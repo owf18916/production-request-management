@@ -22,6 +22,7 @@ class User extends Model
         'password',
         'full_name',
         'role',
+        'last_login_at',
     ];
 
     protected array $hidden = [
