@@ -164,5 +164,216 @@ class User extends Model
                 ORDER BY full_name ASC";
         return Database::results($sql);
     }
+
+    /**
+     * Get all users (for admin user management)
+     */
+    public static function getAll(): array
+    {
+        $sql = "SELECT id, nik, username, full_name, role, last_login_at, created_at, updated_at 
+                FROM users 
+                ORDER BY full_name ASC";
+        return Database::results($sql);
+    }
+
+    /**
+     * Get all users with their conveyor assignments
+     */
+    public static function getAllWithConveyors(): array
+    {
+        $sql = "SELECT u.id, u.nik, u.username, u.full_name, u.role, u.last_login_at, u.created_at, u.updated_at,
+                       GROUP_CONCAT(mc.id) as conveyor_ids,
+                       GROUP_CONCAT(mc.conveyor_name) as conveyor_names,
+                       GROUP_CONCAT(mc.status) as conveyor_statuses
+                FROM users u
+                LEFT JOIN user_conveyor uc ON u.id = uc.user_id
+                LEFT JOIN master_conveyor mc ON uc.conveyor_id = mc.id
+                GROUP BY u.id
+                ORDER BY u.full_name ASC";
+        return Database::results($sql);
+    }
+
+    /**
+     * Create a new user (base create method)
+     */
+    public static function create(array $data): bool
+    {
+        if (isset($data['password'])) {
+            $data['password'] = Security::hashPassword($data['password']);
+        }
+
+        $fillable = (new static())->fillable;
+        $columns = [];
+        $values = [];
+        $placeholders = [];
+
+        foreach ($data as $key => $value) {
+            if (in_array($key, $fillable)) {
+                $columns[] = $key;
+                $values[] = $value;
+                $placeholders[] = '?';
+            }
+        }
+
+        if (empty($columns)) {
+            return false;
+        }
+
+        $sql = "INSERT INTO users (" . implode(', ', $columns) . ") 
+                VALUES (" . implode(', ', $placeholders) . ")";
+
+        try {
+            Database::query($sql, $values);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Update a user by ID
+     */
+    public static function update(mixed $id, array $data): bool
+    {
+        if (isset($data['password'])) {
+            $data['password'] = Security::hashPassword($data['password']);
+        }
+
+        $fillable = (new static())->fillable;
+        $updates = [];
+        $values = [];
+
+        foreach ($data as $key => $value) {
+            if (in_array($key, $fillable)) {
+                $updates[] = "$key = ?";
+                $values[] = $value;
+            }
+        }
+
+        if (empty($updates)) {
+            return false;
+        }
+
+        $values[] = $id;
+        $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+
+        try {
+            Database::query($sql, $values);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Delete a user by ID
+     */
+    public static function delete(mixed $id): bool
+    {
+        $sql = "DELETE FROM users WHERE id = ?";
+        try {
+            $result = Database::query($sql, [$id]);
+            return $result->rowCount() > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Sync user conveyors (bulk assign/remove)
+     * Replaces current conveyor assignments with new ones
+     */
+    public static function syncConveyors(int $userId, array $conveyorIds = []): bool
+    {
+        try {
+            // Delete all current assignments
+            $deleteSql = "DELETE FROM user_conveyor WHERE user_id = ?";
+            Database::query($deleteSql, [$userId]);
+
+            // Insert new assignments
+            if (!empty($conveyorIds)) {
+                $conveyorIds = array_filter($conveyorIds); // Remove empty values
+                
+                foreach ($conveyorIds as $conveyorId) {
+                    $insertSql = "INSERT INTO user_conveyor (user_id, conveyor_id, created_at)
+                                  VALUES (?, ?, NOW())";
+                    Database::query($insertSql, [$userId, (int)$conveyorId]);
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Update user password
+     */
+    public static function updatePassword(int $userId, string $newPassword): bool
+    {
+        $hashedPassword = Security::hashPassword($newPassword);
+        $sql = "UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?";
+        
+        try {
+            Database::query($sql, [$hashedPassword, $userId]);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if username exists (excluding current user)
+     */
+    public static function usernameExists(string $username, ?int $excludeId = null): bool
+    {
+        if ($excludeId !== null) {
+            $sql = "SELECT COUNT(*) as count FROM users WHERE username = ? AND id != ?";
+            $result = Database::row($sql, [$username, $excludeId]);
+        } else {
+            $sql = "SELECT COUNT(*) as count FROM users WHERE username = ?";
+            $result = Database::row($sql, [$username]);
+        }
+        return $result->count > 0;
+    }
+
+    /**
+     * Check if NIK exists (excluding current user)
+     */
+    public static function nikExists(string $nik, ?int $excludeId = null): bool
+    {
+        if ($excludeId !== null) {
+            $sql = "SELECT COUNT(*) as count FROM users WHERE nik = ? AND id != ?";
+            $result = Database::row($sql, [$nik, $excludeId]);
+        } else {
+            $sql = "SELECT COUNT(*) as count FROM users WHERE nik = ?";
+            $result = Database::row($sql, [$nik]);
+        }
+        return $result->count > 0;
+    }
+
+    /**
+     * Search users by NIK, username, or full name
+     */
+    public static function search(string $query): array
+    {
+        $searchTerm = "%$query%";
+        $sql = "SELECT id, nik, username, full_name, role, last_login_at, created_at, updated_at 
+                FROM users 
+                WHERE nik LIKE ? OR username LIKE ? OR full_name LIKE ?
+                ORDER BY full_name ASC";
+        return Database::results($sql, [$searchTerm, $searchTerm, $searchTerm]);
+    }
+
+    /**
+     * Count total users
+     */
+    public static function count(): int
+    {
+        $sql = "SELECT COUNT(*) as total FROM users";
+        $result = Database::row($sql);
+        return (int)$result->total;
+    }
 }
 

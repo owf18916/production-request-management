@@ -32,6 +32,20 @@
                 <div class="hidden md:flex items-center space-x-8">
                     <?php if (session('user_id')): ?>
                         <a href="<?php echo url('dashboard'); ?>" class="text-gray-700 hover:text-gray-900">Dashboard</a>
+                        <?php if (session('user_role') === 'admin'): ?>
+                            <a href="<?php echo url('/admin/users'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                Users
+                            </a>
+                            <a href="<?php echo url('/admin/master/atk'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4l8-4M3 7v10l8 4m0 0l8-4M3 7l8 4"></path>
+                                </svg>
+                                Master ATK
+                            </a>
+                        <?php endif; ?>
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="text-gray-700 hover:text-gray-900 flex items-center">
                                 <span><?php echo e(session('user_name', 'User')); ?></span>
@@ -42,6 +56,10 @@
                             <div x-show="open" @click.outside="open = false"
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
                                 <a href="<?php echo url('profile'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+                                <?php if (session('user_role') === 'admin'): ?>
+                                    <a href="<?php echo url('/admin/users'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-100">Manage Users</a>
+                                    <a href="<?php echo url('/admin/master/atk'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Master ATK</a>
+                                <?php endif; ?>
                                 <a href="<?php echo url('logout'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
                             </div>
                         </div>

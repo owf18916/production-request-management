@@ -31,8 +31,16 @@ abstract class Controller
             die("View not found: $view");
         }
 
+        // Capture view output
+        ob_start();
         extract($this->data);
         require $viewPath;
+        $content = ob_get_clean();
+
+        // Always render with main layout
+        extract($this->data);
+        $layoutPath = __DIR__ . "/Views/layouts/main.php";
+        require $layoutPath;
     }
 
     /**
