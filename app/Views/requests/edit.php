@@ -1,9 +1,4 @@
 <!-- Request Edit View -->
-<?php
-$content = ob_get_clean();
-ob_start();
-?>
-
 <div class="py-6">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
@@ -18,10 +13,3 @@ ob_start();
         </div>
     </div>
 </div>
-
-<?php
-$content = ob_get_clean();
-$data['content'] = $content;
-extract($data);
-require __DIR__ . '/../layouts/main.php';
-?>

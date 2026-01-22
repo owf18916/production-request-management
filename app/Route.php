@@ -95,6 +95,16 @@ class Route
      */
     private function matchPath(string $path): bool
     {
+        // First, check for exact static match (for literal paths)
+        if ($this->path === $path) {
+            return true;
+        }
+
+        // Only apply regex if route contains parameters
+        if (strpos($this->path, '{') === false) {
+            return false;
+        }
+
         $pattern = preg_replace('/{([a-zA-Z_][a-zA-Z0-9_]*)}/', '(?P<$1>[^/]+)', $this->path);
         $pattern = "#^{$pattern}$#";
 

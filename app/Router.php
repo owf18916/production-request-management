@@ -76,6 +76,15 @@ class Router
      */
     public function dispatch(string $method, string $path): void
     {
+        // First pass: try to match exact static routes (no parameters)
+        foreach ($this->routes as $route) {
+            if ($route->matches($method, $path) && strpos($route->getPath(), '{') === false) {
+                $this->handleRoute($route);
+                return;
+            }
+        }
+
+        // Second pass: try to match dynamic routes (with parameters)
         foreach ($this->routes as $route) {
             if ($route->matches($method, $path)) {
                 $this->handleRoute($route);

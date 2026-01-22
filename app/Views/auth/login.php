@@ -1,8 +1,21 @@
-<?php
-$content = ob_get_clean();
-ob_start();
-?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrfToken()); ?>">
+    <title><?php echo isset($title) ? e($title) . ' - ' : ''; echo e(config('app.name', 'Production Request Management System')); ?></title>
 
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="<?php echo url('css/style.css'); ?>">
+</head>
+<body class="bg-gray-50">
 <div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="w-full max-w-md">
         <!-- Header -->
@@ -140,6 +153,8 @@ ob_start();
         </p>
     </div>
 </div>
+</body>
+</html>
 
 <script>
     function loginForm() {
@@ -189,10 +204,3 @@ ob_start();
         }
     }
 </script>
-
-<?php
-$content = ob_get_clean();
-$data['content'] = $content;
-extract($data);
-require __DIR__ . '/../layouts/main.php';
-?>

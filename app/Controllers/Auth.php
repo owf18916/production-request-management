@@ -23,7 +23,7 @@ class Auth extends Controller
         }
 
         $this->setTitle('Login - Production Request Management');
-        $this->view('auth/login');
+        $this->view('auth/login', [], false);
     }
 
     /**

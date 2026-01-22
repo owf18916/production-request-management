@@ -45,6 +45,31 @@
                                 </svg>
                                 Master ATK
                             </a>
+                            <a href="<?php echo url('/admin/master/checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                </svg>
+                                Checksheet
+                            </a>
+                            <a href="<?php echo url('/admin/requests/atk'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                ATK Requests
+                            </a>
+                            <a href="<?php echo url('/admin/request_checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                Checksheet Requests
+                            </a>
+                        <?php else: ?>
+                            <a href="<?php echo url('/request_checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                Checksheet Requests
+                            </a>
                         <?php endif; ?>
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="text-gray-700 hover:text-gray-900 flex items-center">
@@ -56,9 +81,14 @@
                             <div x-show="open" @click.outside="open = false"
                                  class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
                                 <a href="<?php echo url('profile'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="<?php echo url('change-password'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a>
                                 <?php if (session('user_role') === 'admin'): ?>
                                     <a href="<?php echo url('/admin/users'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-100">Manage Users</a>
                                     <a href="<?php echo url('/admin/master/atk'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Master ATK</a>
+                                    <a href="<?php echo url('/admin/master/checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Master Checksheet</a>
+                                    <a href="<?php echo url('/admin/request_checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Checksheet Requests</a>
+                                <?php else: ?>
+                                    <a href="<?php echo url('/request_checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-100">Checksheet Requests</a>
                                 <?php endif; ?>
                                 <a href="<?php echo url('logout'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
                             </div>

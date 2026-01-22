@@ -21,7 +21,7 @@ abstract class Controller
     /**
      * Render a view
      */
-    protected function view(string $view, array $data = []): void
+    protected function view(string $view, array $data = [], bool $withLayout = true): void
     {
         $this->data = array_merge($this->data, $data);
         $viewPath = __DIR__ . "/Views/$view.php";
@@ -37,10 +37,14 @@ abstract class Controller
         require $viewPath;
         $content = ob_get_clean();
 
-        // Always render with main layout
-        extract($this->data);
-        $layoutPath = __DIR__ . "/Views/layouts/main.php";
-        require $layoutPath;
+        // Render with layout if needed
+        if ($withLayout) {
+            extract($this->data);
+            $layoutPath = __DIR__ . "/Views/layouts/main.php";
+            require $layoutPath;
+        } else {
+            echo $content;
+        }
     }
 
     /**

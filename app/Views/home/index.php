@@ -101,10 +101,3 @@ ob_start();
         </div>
     </div>
 </div>
-
-<?php
-$content = ob_get_clean();
-$data['content'] = $content;
-extract($data);
-require __DIR__ . '/../layouts/main.php';
-?>

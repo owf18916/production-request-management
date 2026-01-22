@@ -4,6 +4,7 @@ namespace App\Controllers\Api;
 
 use App\Controller;
 use App\Session;
+use App\Models\MasterATK as MasterATKModel;
 
 /**
  * API Request Controller
@@ -65,4 +66,24 @@ class Request extends Controller
             ],
         ], 201);
     }
+
+    /**
+     * Search ATK items (JSON)
+     */
+    public function searchATK(): void
+    {
+        header('Content-Type: application/json');
+        
+        $query = $this->input('q', '');
+        
+        if (strlen($query) < 1) {
+            echo json_encode(['results' => []]);
+            exit;
+        }
+
+        $results = MasterATKModel::search($query);
+        echo json_encode(['results' => $results]);
+        exit;
+    }
 }
+

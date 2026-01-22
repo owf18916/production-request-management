@@ -1,8 +1,3 @@
-<?php
-$content = ob_get_clean();
-ob_start();
-?>
-
 <div class="max-w-md mx-auto mt-12">
     <div class="bg-white rounded-lg shadow-md p-8">
         <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Register</h1>
@@ -54,10 +49,3 @@ ob_start();
         </p>
     </div>
 </div>
-
-<?php
-$content = ob_get_clean();
-$data['content'] = $content;
-extract($data);
-require __DIR__ . '/../layouts/main.php';
-?>
