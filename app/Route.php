@@ -10,11 +10,11 @@ class Route
 {
     private string $method;
     private string $path;
-    private string|array $action;
+    private $action;
     private array $middleware = [];
     private array $params = [];
 
-    public function __construct(string $method, string $path, string|array $action)
+    public function __construct(string $method, string $path, $action)
     {
         $this->method = strtoupper($method);
         $this->path = $path;
@@ -40,7 +40,7 @@ class Route
     /**
      * Get the route action
      */
-    public function getAction(): string|array
+    public function getAction()
     {
         return $this->action;
     }

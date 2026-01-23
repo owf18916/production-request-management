@@ -14,7 +14,7 @@ class Router
     /**
      * Register a GET route
      */
-    public function get(string $path, string|array $action): Route
+    public function get(string $path, $action): Route
     {
         return $this->addRoute('GET', $path, $action);
     }
@@ -22,7 +22,7 @@ class Router
     /**
      * Register a POST route
      */
-    public function post(string $path, string|array $action): Route
+    public function post(string $path, $action): Route
     {
         return $this->addRoute('POST', $path, $action);
     }
@@ -30,7 +30,7 @@ class Router
     /**
      * Register a PUT route
      */
-    public function put(string $path, string|array $action): Route
+    public function put(string $path, $action): Route
     {
         return $this->addRoute('PUT', $path, $action);
     }
@@ -38,7 +38,7 @@ class Router
     /**
      * Register a DELETE route
      */
-    public function delete(string $path, string|array $action): Route
+    public function delete(string $path, $action): Route
     {
         return $this->addRoute('DELETE', $path, $action);
     }
@@ -46,7 +46,7 @@ class Router
     /**
      * Register a PATCH route
      */
-    public function patch(string $path, string|array $action): Route
+    public function patch(string $path, $action): Route
     {
         return $this->addRoute('PATCH', $path, $action);
     }
@@ -54,7 +54,7 @@ class Router
     /**
      * Register any method route
      */
-    public function any(string $path, string|array $action): Route
+    public function any(string $path, $action): Route
     {
         $this->addRoute('GET', $path, $action);
         return $this->addRoute('POST', $path, $action);
@@ -63,7 +63,7 @@ class Router
     /**
      * Add a route
      */
-    private function addRoute(string $method, string $path, string|array $action): Route
+    private function addRoute(string $method, string $path, $action): Route
     {
         $route = new Route($method, $path, $action);
         $this->routes[] = $route;
