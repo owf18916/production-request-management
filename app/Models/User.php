@@ -45,7 +45,7 @@ class User extends Model
         }
 
         // Verify password
-        if (!Security::verifyPassword($password, $user->password)) {
+        if (!password_verify($password, $user->password)) {
             return null;
         }
 

@@ -37,6 +37,12 @@ class Auth extends Controller
 
         // Validate CSRF token
         $csrfToken = $this->input('_csrf_token');
+        
+        if (!$csrfToken) {
+            Session::flash('error', 'Security token missing. Please try again.');
+            $this->redirect(url('login'));
+        }
+        
         if (!Session::verifyToken($csrfToken)) {
             Session::flash('error', 'Security token expired. Please try again.');
             $this->redirect(url('login'));
