@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?php echo url('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 </head>
 <body class="bg-gray-50" x-data>
     <!-- Header Navigation -->
@@ -70,6 +70,6 @@
     </footer>
 
     <!-- Custom JS -->
-    <script src="<?php echo url('js/app.js'); ?>"></script>
+    <script src="<?php echo asset('js/app.js'); ?>"></script>
 </body>
 </html>

@@ -13,6 +13,8 @@ class RequestChecksheet extends Model
     protected array $fillable = [
         'request_number',
         'checksheet_id',
+        'conveyor_id',
+        'shift',
         'qty',
         'status',
         'requested_by',
@@ -26,9 +28,10 @@ class RequestChecksheet extends Model
      */
     public static function getAll(): array
     {
-        $sql = "SELECT rc.*, mc.nama_checksheet, u.full_name 
+        $sql = "SELECT rc.*, mc.nama_checksheet, mco.conveyor_name, u.full_name 
                 FROM request_checksheet rc
                 LEFT JOIN master_checksheet mc ON rc.checksheet_id = mc.id
+                LEFT JOIN master_conveyor mco ON rc.conveyor_id = mco.id
                 LEFT JOIN users u ON rc.requested_by = u.id
                 ORDER BY rc.created_at DESC";
         return Database::results($sql);
@@ -39,9 +42,10 @@ class RequestChecksheet extends Model
      */
     public static function getByUser(int $userId): array
     {
-        $sql = "SELECT rc.*, mc.nama_checksheet, u.full_name 
+        $sql = "SELECT rc.*, mc.nama_checksheet, mco.conveyor_name, u.full_name 
                 FROM request_checksheet rc
                 LEFT JOIN master_checksheet mc ON rc.checksheet_id = mc.id
+                LEFT JOIN master_conveyor mco ON rc.conveyor_id = mco.id
                 LEFT JOIN users u ON rc.requested_by = u.id
                 WHERE rc.requested_by = ?
                 ORDER BY rc.created_at DESC";
@@ -53,9 +57,10 @@ class RequestChecksheet extends Model
      */
     public static function findById($id)
     {
-        $sql = "SELECT rc.*, mc.nama_checksheet, u.full_name, ua.full_name as approved_by_name
+        $sql = "SELECT rc.*, mc.nama_checksheet, mco.conveyor_name, u.full_name, ua.full_name as approved_by_name
                 FROM request_checksheet rc
                 LEFT JOIN master_checksheet mc ON rc.checksheet_id = mc.id
+                LEFT JOIN master_conveyor mco ON rc.conveyor_id = mco.id
                 LEFT JOIN users u ON rc.requested_by = u.id
                 LEFT JOIN users ua ON rc.approved_by = ua.id
                 WHERE rc.id = ?";

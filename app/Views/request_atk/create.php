@@ -62,6 +62,56 @@
                     </div>
                 </div>
 
+                <!-- Conveyor Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Conveyor <span class="text-gray-500">(optional)</span>
+                    </label>
+                    <?php if (isset($errors['conveyor_id'])): ?>
+                        <div class="p-3 mb-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                            <?php echo $errors['conveyor_id']; ?>
+                        </div>
+                    <?php endif; ?>
+                    <select 
+                        name="conveyor_id" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">-- Select Conveyor --</option>
+                        <?php if (isset($conveyors)): ?>
+                            <?php foreach ($conveyors as $conveyor): ?>
+                                <option value="<?php echo $conveyor->id; ?>" <?php echo (isset($conveyor_id) && $conveyor_id == $conveyor->id) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($conveyor->conveyor_name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <!-- Shift Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Shift <span class="text-gray-500">(optional)</span>
+                    </label>
+                    <?php if (isset($errors['shift'])): ?>
+                        <div class="p-3 mb-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                            <?php echo $errors['shift']; ?>
+                        </div>
+                    <?php endif; ?>
+                    <select 
+                        name="shift" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">-- Select Shift --</option>
+                        <?php if (isset($shifts)): ?>
+                            <?php foreach ($shifts as $shiftOption): ?>
+                                <option value="<?php echo $shiftOption; ?>" <?php echo (isset($shift) && $shift === $shiftOption) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($shiftOption); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
                 <!-- Quantity -->
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">

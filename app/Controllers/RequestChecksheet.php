@@ -7,6 +7,7 @@ use App\Session;
 use App\Security;
 use App\Models\RequestChecksheet as RequestChecksheetModel;
 use App\Models\MasterChecksheet;
+use App\Models\Conveyor as ConveyorModel;
 use App\Models\User;
 
 class RequestChecksheet extends Controller
@@ -53,10 +54,15 @@ class RequestChecksheet extends Controller
     public function create(): void
     {
         $checksheets = MasterChecksheet::getAll();
+        $conveyors = ConveyorModel::getActive();
+        $shifts = ['Shift A', 'Shift B'];
 
         $this->setTitle('Create Request Checksheet');
         $this->view('request_checksheet/create', [
             'checksheets' => $checksheets,
+            'conveyors' => $conveyors,
+            'shifts' => $shifts,
+            'csrf_token' => Session::generateToken(),
         ]);
     }
 
@@ -73,7 +79,10 @@ class RequestChecksheet extends Controller
         }
 
         $checksheetId = $this->input('checksheet_id');
+        $conveyorId = $this->input('conveyor_id');
+        $shift = $this->input('shift');
         $qty = $this->input('qty');
+        $notes = $this->input('notes', '');
 
         $errors = [];
 
@@ -93,13 +102,34 @@ class RequestChecksheet extends Controller
             $errors['qty'] = 'Quantity must be a positive number';
         }
 
+        // Validate conveyor (optional)
+        if ($conveyorId && !is_numeric($conveyorId)) {
+            $errors['conveyor_id'] = 'Invalid conveyor selected';
+        } elseif ($conveyorId) {
+            $conveyor = ConveyorModel::findById((int)$conveyorId);
+            if (!$conveyor) {
+                $errors['conveyor_id'] = 'Selected conveyor does not exist';
+            }
+        }
+
+        // Validate shift (optional)
+        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
+            $errors['shift'] = 'Invalid shift selected';
+        }
+
         if (!empty($errors)) {
             $this->setTitle('Create Request Checksheet');
             $this->view('request_checksheet/create', [
                 'errors' => $errors,
                 'checksheet_id' => $checksheetId,
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
                 'qty' => $qty,
+                'notes' => $notes,
                 'checksheets' => MasterChecksheet::getAll(),
+                'conveyors' => ConveyorModel::getActive(),
+                'shifts' => ['Shift A', 'Shift B'],
+                'csrf_token' => Session::generateToken(),
             ]);
             return;
         }
@@ -111,10 +141,12 @@ class RequestChecksheet extends Controller
             $success = RequestChecksheetModel::create([
                 'request_number' => $requestNumber,
                 'checksheet_id' => (int)$checksheetId,
+                'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
+                'shift' => $shift ?: null,
                 'qty' => (int)$qty,
                 'status' => 'pending',
                 'requested_by' => session('user_id'),
-                'notes' => $this->input('notes'),
+                'notes' => $notes ?: null,
             ]);
         } catch (\Exception $e) {
             error_log('RequestChecksheet::store() error: ' . $e->getMessage());

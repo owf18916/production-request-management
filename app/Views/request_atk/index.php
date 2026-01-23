@@ -168,7 +168,7 @@
                                     <?php echo date('d/m/Y', strtotime($request->created_at)); ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="<?php echo url("requests/atk/{$request->id}"); ?>" class="text-blue-600 hover:text-blue-900">View</a>
+                                    <a href="<?php echo url("requests/atk/show/{$request->id}"); ?>" class="text-blue-600 hover:text-blue-900">View</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

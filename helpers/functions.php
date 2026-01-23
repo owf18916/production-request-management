@@ -100,13 +100,24 @@ function e($value)
 }
 
 /**
- * Get URL helper
+ * Get URL helper - Dynamic based on current host
  */
 if (!function_exists('url')) {
 function url(string $path = ''): string
 {
-    $appUrl = env('APP_URL', 'http://localhost');
-    return rtrim($appUrl, '/') . '/' . ltrim($path, '/');
+    // Gunakan current protocol dan host untuk dynamic URL
+    $protocol = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // Get app base path dari directory structure
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+    $baseDir = dirname($scriptName);
+    if ($baseDir === '\\' || $baseDir === '/') {
+        $baseDir = '';
+    }
+    
+    $baseUrl = rtrim("$protocol://$host$baseDir", '/');
+    return $baseUrl . '/' . ltrim($path, '/');
 }
 }
 
@@ -333,3 +344,14 @@ function appLog(string $message, string $level = 'INFO'): void
     @file_put_contents($logFile, $logMessage, FILE_APPEND);
 }
 }
+
+/**
+ * Get asset URL - Helper specifically for static assets
+ */
+if (!function_exists('asset')) {
+function asset(string $path = ''): string
+{
+    return url('assets/' . ltrim($path, '/'));
+}
+}
+

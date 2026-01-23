@@ -12,6 +12,8 @@ class RequestMemo extends Model
 
     protected array $fillable = [
         'request_number',
+        'conveyor_id',
+        'shift',
         'memo_content',
         'status',
         'requested_by',
@@ -25,8 +27,9 @@ class RequestMemo extends Model
      */
     public static function getAll(): array
     {
-        $sql = "SELECT rm.*, u1.full_name as requester, u2.full_name as approver 
+        $sql = "SELECT rm.*, mc.conveyor_name, u1.full_name as requester, u2.full_name as approver 
                 FROM request_memo rm
+                LEFT JOIN master_conveyor mc ON rm.conveyor_id = mc.id
                 LEFT JOIN users u1 ON rm.requested_by = u1.id
                 LEFT JOIN users u2 ON rm.approved_by = u2.id
                 ORDER BY rm.created_at DESC";
@@ -38,8 +41,9 @@ class RequestMemo extends Model
      */
     public static function getByUser(int $userId): array
     {
-        $sql = "SELECT rm.*, u1.full_name as requester, u2.full_name as approver 
+        $sql = "SELECT rm.*, mc.conveyor_name, u1.full_name as requester, u2.full_name as approver 
                 FROM request_memo rm
+                LEFT JOIN master_conveyor mc ON rm.conveyor_id = mc.id
                 LEFT JOIN users u1 ON rm.requested_by = u1.id
                 LEFT JOIN users u2 ON rm.approved_by = u2.id
                 WHERE rm.requested_by = ?
@@ -52,8 +56,9 @@ class RequestMemo extends Model
      */
     public static function findById($id)
     {
-        $sql = "SELECT rm.*, u1.full_name as requester, u2.full_name as approver 
+        $sql = "SELECT rm.*, mc.conveyor_name, u1.full_name as requester, u2.full_name as approver 
                 FROM request_memo rm
+                LEFT JOIN master_conveyor mc ON rm.conveyor_id = mc.id
                 LEFT JOIN users u1 ON rm.requested_by = u1.id
                 LEFT JOIN users u2 ON rm.approved_by = u2.id
                 WHERE rm.id = ?";

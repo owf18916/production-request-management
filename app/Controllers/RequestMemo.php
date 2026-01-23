@@ -7,6 +7,7 @@ use App\Database;
 use App\Security;
 use App\Controller;
 use App\Models\RequestMemo as RequestMemoModel;
+use App\Models\Conveyor as ConveyorModel;
 
 class RequestMemo extends Controller
 {
@@ -47,8 +48,15 @@ class RequestMemo extends Controller
      */
     public function create(): void
     {
+        $conveyors = ConveyorModel::getActive();
+        $shifts = ['Shift A', 'Shift B'];
+        
         $this->setTitle('Create Internal Memo Request');
-        $this->view('request_memo/create');
+        $this->view('request_memo/create', [
+            'conveyors' => $conveyors,
+            'shifts' => $shifts,
+            'csrf_token' => Session::generateToken(),
+        ]);
     }
 
     /**
@@ -62,6 +70,8 @@ class RequestMemo extends Controller
         }
 
         $memoContent = $this->input('memo_content');
+        $conveyorId = $this->input('conveyor_id');
+        $shift = $this->input('shift');
         $errors = [];
 
         // Validation
@@ -73,11 +83,31 @@ class RequestMemo extends Controller
             $errors['memo_content'] = 'Memo content must not exceed 5000 characters';
         }
 
+        // Validate conveyor (optional)
+        if ($conveyorId && !is_numeric($conveyorId)) {
+            $errors['conveyor_id'] = 'Invalid conveyor selected';
+        } elseif ($conveyorId) {
+            $conveyor = ConveyorModel::findById((int)$conveyorId);
+            if (!$conveyor) {
+                $errors['conveyor_id'] = 'Selected conveyor does not exist';
+            }
+        }
+
+        // Validate shift (optional)
+        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
+            $errors['shift'] = 'Invalid shift selected';
+        }
+
         if (!empty($errors)) {
             $this->setTitle('Create Internal Memo Request');
             $this->view('request_memo/create', [
                 'errors' => $errors,
                 'memo_content' => $memoContent,
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
+                'conveyors' => ConveyorModel::getActive(),
+                'shifts' => ['Shift A', 'Shift B'],
+                'csrf_token' => Session::generateToken(),
             ]);
             return;
         }
@@ -86,6 +116,8 @@ class RequestMemo extends Controller
         $requestNumber = RequestMemoModel::generateRequestNumber();
         $success = RequestMemoModel::create([
             'request_number' => $requestNumber,
+            'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
+            'shift' => $shift ?: null,
             'memo_content' => $memoContent,
             'status' => 'pending',
             'requested_by' => session('user_id'),

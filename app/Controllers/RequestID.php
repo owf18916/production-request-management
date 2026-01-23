@@ -6,6 +6,7 @@ use App\Controller;
 use App\Session;
 use App\Security;
 use App\Models\RequestID as RequestIDModel;
+use App\Models\Conveyor as ConveyorModel;
 
 class RequestID extends Controller
 {
@@ -83,10 +84,16 @@ class RequestID extends Controller
      */
     public function create(): void
     {
+        $conveyors = ConveyorModel::getActive();
+        $shifts = ['Shift A', 'Shift B'];
+        
         $this->setTitle('Request ID');
         $this->view('request_id/create', [
             'idTypes' => RequestIDModel::VALID_ID_TYPES,
             'idTypeFields' => self::ID_TYPE_FIELDS,
+            'conveyors' => $conveyors,
+            'shifts' => $shifts,
+            'csrf_token' => Session::generateToken(),
         ]);
     }
 
@@ -101,6 +108,8 @@ class RequestID extends Controller
         }
 
         $idType = $this->input('id_type');
+        $conveyorId = $this->input('conveyor_id');
+        $shift = $this->input('shift');
         $userId = session('user_id');
 
         $errors = [];
@@ -135,13 +144,31 @@ class RequestID extends Controller
             }
         }
 
+        // Validate conveyor (optional)
+        if ($conveyorId && !is_numeric($conveyorId)) {
+            $errors['conveyor_id'] = 'Invalid conveyor selected';
+        } elseif ($conveyorId) {
+            $conveyor = ConveyorModel::findById((int)$conveyorId);
+            if (!$conveyor) {
+                $errors['conveyor_id'] = 'Selected conveyor does not exist';
+            }
+        }
+
+        // Validate shift (optional)
+        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
+            $errors['shift'] = 'Invalid shift selected';
+        }
+
         if (!empty($errors)) {
             $this->setTitle('Request ID');
             $this->view('request_id/create', [
                 'errors' => $errors,
                 'idTypes' => RequestIDModel::VALID_ID_TYPES,
                 'idTypeFields' => self::ID_TYPE_FIELDS,
-                'formData' => ['id_type' => $idType] + ($details ?? []),
+                'formData' => ['id_type' => $idType, 'conveyor_id' => $conveyorId, 'shift' => $shift] + ($details ?? []),
+                'conveyors' => ConveyorModel::getActive(),
+                'shifts' => ['Shift A', 'Shift B'],
+                'csrf_token' => Session::generateToken(),
             ]);
             return;
         }
@@ -153,6 +180,8 @@ class RequestID extends Controller
         $success = RequestIDModel::create([
             'request_number' => $requestNumber,
             'id_type' => $idType,
+            'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
+            'shift' => $shift ?: null,
             'status' => 'pending',
             'requested_by' => $userId,
             'notes' => $this->input('notes'),

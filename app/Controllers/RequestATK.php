@@ -7,6 +7,7 @@ use App\Session;
 use App\Security;
 use App\Models\RequestATK as RequestATKModel;
 use App\Models\MasterATK as MasterATKModel;
+use App\Models\Conveyor as ConveyorModel;
 use App\Models\User as UserModel;
 
 class RequestATK extends Controller
@@ -79,9 +80,17 @@ class RequestATK extends Controller
             $this->redirect(url('admin/requests/atk'), 'error', 'Admin cannot create requests from PIC view');
         }
 
+        // Get active conveyors for dropdown
+        $conveyors = ConveyorModel::getActive();
+        
+        // Shift options
+        $shifts = ['Shift A', 'Shift B'];
+
         $this->setTitle('Create Request ATK');
         $this->view('request_atk/create', [
             'csrf_token' => Session::generateToken(),
+            'conveyors' => $conveyors,
+            'shifts' => $shifts,
         ]);
     }
 
@@ -102,6 +111,8 @@ class RequestATK extends Controller
         }
 
         $atkId = $this->input('atk_id');
+        $conveyorId = $this->input('conveyor_id');
+        $shift = $this->input('shift');
         $qty = $this->input('qty');
         $notes = $this->input('notes', '');
 
@@ -125,14 +136,36 @@ class RequestATK extends Controller
             $errors['qty'] = 'Quantity cannot exceed 9999';
         }
 
+        // Validate conveyor (optional)
+        if ($conveyorId && !is_numeric($conveyorId)) {
+            $errors['conveyor_id'] = 'Invalid conveyor selected';
+        } elseif ($conveyorId) {
+            $conveyor = ConveyorModel::findById((int)$conveyorId);
+            if (!$conveyor) {
+                $errors['conveyor_id'] = 'Selected conveyor does not exist';
+            }
+        }
+
+        // Validate shift (optional)
+        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
+            $errors['shift'] = 'Invalid shift selected';
+        }
+
         if (!empty($errors)) {
+            $conveyors = ConveyorModel::getActive();
+            $shifts = ['Shift A', 'Shift B'];
+            
             $this->setTitle('Create Request ATK');
             $this->view('request_atk/create', [
                 'errors' => $errors,
                 'csrf_token' => Session::generateToken(),
                 'atk_id' => $atkId,
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
                 'qty' => $qty,
                 'notes' => $notes,
+                'conveyors' => $conveyors,
+                'shifts' => $shifts,
             ]);
             return;
         }
@@ -144,6 +177,8 @@ class RequestATK extends Controller
         $success = RequestATKModel::create([
             'request_number' => $requestNumber,
             'atk_id' => (int)$atkId,
+            'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
+            'shift' => $shift ?: null,
             'qty' => (int)$qty,
             'status' => 'pending',
             'requested_by' => $userId,
