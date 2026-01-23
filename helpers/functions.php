@@ -30,7 +30,26 @@ function env(string $key, mixed $default = null): mixed
 
             if (str_contains($line, '=')) {
                 [$envKey, $envValue] = explode('=', $line, 2);
-                $env[trim($envKey)] = trim($envValue);
+                $envKey = trim($envKey);
+                $envValue = trim($envValue);
+                
+                // Parse the value to proper type
+                if ($envValue === '') {
+                    $env[$envKey] = null;
+                } elseif (strtolower($envValue) === 'true') {
+                    $env[$envKey] = true;
+                } elseif (strtolower($envValue) === 'false') {
+                    $env[$envKey] = false;
+                } elseif (strtolower($envValue) === 'null') {
+                    $env[$envKey] = null;
+                } elseif (is_numeric($envValue)) {
+                    $env[$envKey] = (strpos($envValue, '.') === false) ? (int)$envValue : (float)$envValue;
+                } elseif (preg_match('/^".*"$/', $envValue) || preg_match("/^'.*'$/", $envValue)) {
+                    // Remove quotes from quoted strings
+                    $env[$envKey] = substr($envValue, 1, -1);
+                } else {
+                    $env[$envKey] = $envValue;
+                }
             }
         }
     }

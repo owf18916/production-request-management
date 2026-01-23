@@ -219,13 +219,14 @@ copy .env.example .env
 
 Atau jika file `.env.example` tidak ada, buat file baru `.env` di root project:
 
-**Buka dengan text editor (Notepad, VS Code, dll) dan isi:**
+**Buka dengan text editor (Notepad, VS Code, dll) dan isi dengan format yang benar:**
 
 ```env
 APP_NAME="Production Request Management System"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=http://your-domain.com
+APP_URL=http://your-domain.com/production-request-management/public
+APP_TIMEZONE=Asia/Jakarta
 
 DB_CONNECTION=mysql
 DB_HOST=localhost
@@ -235,13 +236,39 @@ DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_CHARSET=utf8mb4
 DB_COLLATION=utf8mb4_unicode_ci
+DB_PREFIX=
+DB_STRICT=true
+DB_ENGINE=InnoDB
 ```
 
 **Penjelasan:**
+- `APP_ENV`: Set ke `production` untuk server live
+- `APP_DEBUG`: Set ke `false` untuk production (jangan expose error detail)
+- `APP_URL`: Ganti dengan domain/IP server Anda
 - `DB_HOST`: Host MySQL (biasanya `localhost`)
-- `DB_NAME`: Nama database yang baru dibuat (`production_request_db`)
+- `DB_NAME`: Nama database (`production_request_db`)
 - `DB_USER`: Username MySQL (default `root`)
 - `DB_PASSWORD`: Password MySQL (kosongkan jika tidak ada password)
+
+**⚠️ Format `.env` - PENTING:**
+- Boolean values: `true` atau `false` (TANPA tanda kutip)
+- String values: Gunakan tanda kutip `"value"` atau `'value'`
+- Tidak ada spasi di sekitar `=`
+- Tidak ada space di value
+
+**Format Benar:**
+```env
+APP_DEBUG=false          ✓ Boolean
+APP_NAME="My App"        ✓ String
+DB_PORT=3306             ✓ Integer
+```
+
+**Format Salah:**
+```env
+APP_DEBUG="false"        ✗ Boolean harus tanpa kutip
+APP_DEBUG = false        ✗ Ada spasi di sekitar =
+APP_NAME="My App         ✗ Missing closing quote
+```
 
 ### Step 4.2: Verifikasi Apache Configuration
 
