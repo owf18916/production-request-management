@@ -113,48 +113,51 @@ Anda seharusnya melihat `production_request_db` dalam list.
 
 ## 📊 TAHAP 3: Import Database Schema
 
-### Step 3.1: Import Schema Utama
+### Step 3.1: Import Schema Lengkap
 
-Dari direktori project, jalankan **HANYA** file `001_initial_schema.sql`:
+**Opsi A: Menggunakan Helper Script (PALING MUDAH) 🎯**
 
-**Command Prompt:**
+Cukup double-click file `import-database.bat` dari folder project:
+
+```
+import-database.bat
+```
+
+Script ini akan:
+- Minta password MySQL
+- Import all 20 tables
+- Load sample data
+- Tampilkan pesan sukses
+
+---
+
+**Opsi B: Manual Command Prompt**
+
+Dari direktori project, jalankan file `000_complete_schema.sql`:
+
 ```cmd
-mysql -u root production_request_db < database/migrations/001_initial_schema.sql
+mysql -u root production_request_db < database/migrations/000_complete_schema.sql
 ```
 
-**PowerShell:**
+---
+
+**Opsi C: Manual PowerShell**
+
 ```powershell
-Get-Content database/migrations/001_initial_schema.sql | mysql -u root production_request_db
+Get-Content database/migrations/000_complete_schema.sql | mysql -u root production_request_db
 ```
+
+---
 
 **⚠️ PENTING:** 
-- File `001_initial_schema.sql` **SUDAH MENCAKUP SEMUA TABLE** (tidak perlu menjalankan file migration lainnya)
-- File lain di folder `database/migrations/` (003-013) adalah **file backup/redundansi**, tidak perlu dijalankan
-- File `setup.sql` adalah alternatif lengkap jika ingin fresh reset
+- Gunakan file **`000_complete_schema.sql`** - ini adalah file terlengkap
+- File ini mencakup SEMUA 20 table dalam satu file
+- Jangan gunakan `001_initial_schema.sql` karena tidak lengkap (hanya 9 table)
+- File lain (003-013) adalah file terpisah, tidak perlu dijalankan
 
 **Hasil yang diharapkan:**
 - Tidak ada pesan error
-- 16 table berhasil dibuat:
-  - users
-  - production_requests
-  - request_comments
-  - request_attachments
-  - audit_logs
-  - activity_logs
-  - password_reset_tokens
-  - master_conveyor
-  - user_conveyor
-  - master_atk
-  - master_checksheet
-  - request_atk
-  - request_atk_history
-  - request_checksheet
-  - request_checksheet_history
-  - request_id
-  - request_id_details
-  - request_id_history
-  - request_memo
-  - request_memo_history
+- Semua 20 table berhasil dibuat
 - Sample data ter-import (akun demo sudah siap)
 
 ### Step 3.2: Verifikasi Import Berhasil
@@ -484,8 +487,8 @@ mysql -u root
 CREATE DATABASE production_request_db CHARACTER SET utf8mb4;
 EXIT;
 
-# Import schema
-mysql -u root production_request_db < database/migrations/001_initial_schema.sql
+# Import schema (gunakan 000_complete_schema.sql - file lengkap!)
+mysql -u root production_request_db < database/migrations/000_complete_schema.sql
 
 # Verify PHP
 php -l public/index.php
