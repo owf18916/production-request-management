@@ -76,9 +76,10 @@ class Database
     /**
      * Fetch a single row
      */
-    public static function row(string $sql, array $params = []): ?object
+    public static function row(string $sql, array $params = [])
     {
-        return self::query($sql, $params)->fetchObject();
+        $result = self::query($sql, $params)->fetchObject();
+        return $result === false ? null : $result;
     }
 
     /**
