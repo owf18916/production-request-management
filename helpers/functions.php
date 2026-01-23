@@ -9,7 +9,7 @@
  * Get environment variable
  */
 if (!function_exists('env')) {
-function env(string $key, mixed $default = null): mixed
+function env(string $key, $default = null)
 {
     $envFile = __DIR__ . '/../.env';
 
