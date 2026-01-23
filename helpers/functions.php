@@ -24,11 +24,13 @@ function env(string $key, $default = null)
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
         foreach ($lines as $line) {
-            if (str_starts_with($line, '#')) {
+            // PHP 7.4 compatible: replace str_starts_with() with strpos()
+            if (strpos($line, '#') === 0) {
                 continue;
             }
 
-            if (str_contains($line, '=')) {
+            // PHP 7.4 compatible: replace str_contains() with strpos()
+            if (strpos($line, '=') !== false) {
                 [$envKey, $envValue] = explode('=', $line, 2);
                 $envKey = trim($envKey);
                 $envValue = trim($envValue);
