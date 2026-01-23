@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS request_id (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    request_number VARCHAR(50) UNIQUE NOT NULL,
+    id_type ENUM('id_punggung', 'pin_4m', 'id_kaki', 'job_psd', 'id_other') NOT NULL,
+    status ENUM('pending', 'approved', 'rejected', 'completed') DEFAULT 'pending' NOT NULL,
+    requested_by INT NOT NULL,
+    approved_by INT NULL,
+    approved_at TIMESTAMP NULL,
+    notes TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_request_number (request_number),
+    INDEX idx_id_type (id_type),
+    INDEX idx_status (status),
+    INDEX idx_requested_by (requested_by),
+    INDEX idx_approved_by (approved_by),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

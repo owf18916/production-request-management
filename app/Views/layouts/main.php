@@ -15,142 +15,50 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo url('css/style.css'); ?>">
 </head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <a href="<?php echo url('/'); ?>" class="text-xl font-bold text-blue-600">
-                            PRM System
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Main Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <?php if (session('user_id')): ?>
-                        <a href="<?php echo url('dashboard'); ?>" class="text-gray-700 hover:text-gray-900">Dashboard</a>
-                        <?php if (session('user_role') === 'admin'): ?>
-                            <a href="<?php echo url('/admin/users'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-2a6 6 0 0112 0v2zm0 0h6v-2a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                </svg>
-                                Users
-                            </a>
-                            <a href="<?php echo url('/admin/master/atk'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4l8-4M3 7v10l8 4m0 0l8-4M3 7l8 4"></path>
-                                </svg>
-                                Master ATK
-                            </a>
-                            <a href="<?php echo url('/admin/master/checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                                </svg>
-                                Checksheet
-                            </a>
-                            <a href="<?php echo url('/admin/requests/atk'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                ATK Requests
-                            </a>
-                            <a href="<?php echo url('/admin/request_checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                Checksheet Requests
-                            </a>
-                        <?php else: ?>
-                            <a href="<?php echo url('/request_checksheet'); ?>" class="text-gray-700 hover:text-gray-900 font-medium flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                Checksheet Requests
-                            </a>
-                        <?php endif; ?>
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="text-gray-700 hover:text-gray-900 flex items-center">
-                                <span><?php echo e(session('user_name', 'User')); ?></span>
-                                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-                                </svg>
-                            </button>
-                            <div x-show="open" @click.outside="open = false"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
-                                <a href="<?php echo url('profile'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="<?php echo url('change-password'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a>
-                                <?php if (session('user_role') === 'admin'): ?>
-                                    <a href="<?php echo url('/admin/users'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-100">Manage Users</a>
-                                    <a href="<?php echo url('/admin/master/atk'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Master ATK</a>
-                                    <a href="<?php echo url('/admin/master/checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Master Checksheet</a>
-                                    <a href="<?php echo url('/admin/request_checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Checksheet Requests</a>
-                                <?php else: ?>
-                                    <a href="<?php echo url('/request_checksheet'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t border-gray-100">Checksheet Requests</a>
-                                <?php endif; ?>
-                                <a href="<?php echo url('logout'); ?>" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a href="<?php echo url('login'); ?>" class="text-gray-700 hover:text-gray-900">Login</a>
-                        <a href="<?php echo url('register'); ?>" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Register</a>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
-                    <button x-data x-on:click="$dispatch('toggle-menu')"
-                            class="text-gray-700 hover:text-gray-900">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Flash Messages -->
-    <?php if (hasFlash('success')): ?>
-        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-4" x-data x-init="setTimeout(() => $el.remove(), 5000)">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-green-700">
-                        <?php echo e(getFlash('success')); ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <?php if (hasFlash('error')): ?>
-        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4" x-data x-init="setTimeout(() => $el.remove(), 5000)">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-700">
-                        <?php echo e(getFlash('error')); ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
+<body class="bg-gray-50" x-data>
+    <!-- Header Navigation -->
+    <?php require __DIR__ . '/header.php'; ?>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <?php echo $content ?? ''; ?>
-    </main>
+    <main class="pt-16 w-full">
+            <!-- Flash Messages -->
+            <?php if (hasFlash('success')): ?>
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 m-4" x-data x-init="setTimeout(() => $el.remove(), 5000)">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                <?php echo e(getFlash('success')); ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (hasFlash('error')): ?>
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 m-4" x-data x-init="setTimeout(() => $el.remove(), 5000)">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                <?php echo e(getFlash('error')); ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Page Content -->
+            <?php echo $content ?? ''; ?>
+        </main>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-12">

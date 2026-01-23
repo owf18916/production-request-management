@@ -107,14 +107,20 @@ class RequestChecksheet extends Controller
         // Generate request number and save
         $requestNumber = RequestChecksheetModel::generateRequestNumber();
         
-        $success = RequestChecksheetModel::create([
-            'request_number' => $requestNumber,
-            'checksheet_id' => (int)$checksheetId,
-            'qty' => (int)$qty,
-            'status' => 'pending',
-            'requested_by' => session('user_id'),
-            'notes' => $this->input('notes'),
-        ]);
+        try {
+            $success = RequestChecksheetModel::create([
+                'request_number' => $requestNumber,
+                'checksheet_id' => (int)$checksheetId,
+                'qty' => (int)$qty,
+                'status' => 'pending',
+                'requested_by' => session('user_id'),
+                'notes' => $this->input('notes'),
+            ]);
+        } catch (\Exception $e) {
+            error_log('RequestChecksheet::store() error: ' . $e->getMessage());
+            $this->redirect(url('/request_checksheet/create'), 'error', 'Database error: ' . $e->getMessage());
+            return;
+        }
 
         if ($success) {
             $this->redirect(url('/request_checksheet'), 'success', 'Request created successfully');

@@ -15,15 +15,8 @@ $router->get('/logout', 'Auth@logout');
 
 // Dashboard routes - WITH authentication middleware
 $router->get('/dashboard', 'Dashboard@index', ['middleware' => 'Authenticate']);
-
-// Request ATK routes (PIC) - WITH authentication middleware - MUST BE BEFORE /requests/{id}
-$router->get('/requests/atk', 'RequestATK@index', ['middleware' => 'Authenticate']);
-$router->get('/requests/atk/create', 'RequestATK@create', ['middleware' => 'Authenticate']);
-$router->post('/requests/atk/store', 'RequestATK@store', ['middleware' => 'Authenticate']);
-$router->get('/requests/atk/{id}', 'RequestATK@show', ['middleware' => 'Authenticate']);
-
-// Admin routes - WITH admin middleware
 $router->get('/dashboard/admin', 'Dashboard@adminDashboard', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/dashboard/pic', 'Dashboard@picDashboard', ['middleware' => 'Authenticate']);
 $router->get('/admin/conveyors', 'Admin@conveyors', ['middleware' => ['Authenticate', 'Admin']]);
 
 // User Management routes - WITH admin middleware
@@ -71,10 +64,22 @@ $router->post('/admin/master/checksheet/update/{id}', 'MasterChecksheet@update',
 $router->post('/admin/master/checksheet/delete/{id}', 'MasterChecksheet@delete', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/master/checksheet/search', 'MasterChecksheet@search', ['middleware' => ['Authenticate', 'Admin']]);
 
+// Request ATK routes (PIC) - WITH authentication middleware - MUST BE BEFORE /requests/atk/{id}
+$router->get('/requests/atk', 'RequestATK@index', ['middleware' => 'Authenticate']);
+$router->get('/requests/atk/create', 'RequestATK@create', ['middleware' => 'Authenticate']);
+$router->post('/requests/atk/store', 'RequestATK@store', ['middleware' => 'Authenticate']);
+$router->get('/requests/atk/show/{id}', 'RequestATK@show', ['middleware' => 'Authenticate']);
+
 // Request ATK routes (Admin) - WITH admin middleware
 $router->get('/admin/requests/atk', 'RequestATK@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/requests/atk/{id}', 'RequestATK@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/requests/atk/{id}/update-status', 'RequestATK@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
+
+// Request ID routes (PIC) - WITH authentication middleware - MUST BE BEFORE /request-id/{id}
+$router->get('/request-id', 'RequestID@index', ['middleware' => 'Authenticate']);
+$router->get('/request-id/create', 'RequestID@create', ['middleware' => 'Authenticate']);
+$router->post('/request-id/store', 'RequestID@store', ['middleware' => 'Authenticate']);
+$router->get('/request-id/{id}', 'RequestID@show', ['middleware' => 'Authenticate']);
 
 // Request Checksheet routes (PIC) - WITH authentication middleware - MUST BE BEFORE /request_checksheet/{id}
 $router->get('/request_checksheet', 'RequestChecksheet@index', ['middleware' => 'Authenticate']);
@@ -87,6 +92,22 @@ $router->get('/request_checksheet/search-checksheet', 'RequestChecksheet@searchC
 $router->get('/admin/request_checksheet', 'RequestChecksheet@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/request_checksheet/show/{id}', 'RequestChecksheet@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/request_checksheet/update_status/{id}', 'RequestChecksheet@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
+
+// Request ID routes (Admin) - WITH admin middleware
+$router->get('/admin/request-id', 'RequestID@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/request-id/{id}', 'RequestID@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
+$router->post('/admin/request-id/{id}/update-status', 'RequestID@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
+
+// Request Memo routes (PIC) - WITH authentication middleware - MUST BE BEFORE /requests/memo/{id}
+$router->get('/requests/memo', 'RequestMemo@index', ['middleware' => 'Authenticate']);
+$router->get('/requests/memo/create', 'RequestMemo@create', ['middleware' => 'Authenticate']);
+$router->post('/requests/memo/store', 'RequestMemo@store', ['middleware' => 'Authenticate']);
+$router->get('/requests/memo/show/{id}', 'RequestMemo@show', ['middleware' => 'Authenticate']);
+
+// Request Memo routes (Admin) - WITH admin middleware
+$router->get('/admin/requests/memo', 'RequestMemo@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/requests/memo/show/{id}', 'RequestMemo@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
+$router->post('/admin/requests/memo/update-status/{id}', 'RequestMemo@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
 
 // API routes (if needed) - WITH authentication middleware
 $router->get('/api/requests', 'Api\Request@index', ['middleware' => 'Authenticate']);
