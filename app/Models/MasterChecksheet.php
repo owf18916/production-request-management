@@ -88,7 +88,7 @@ class MasterChecksheet extends Model
     /**
      * Update Checksheet (static method with mixed $id - compatible with parent)
      */
-    public static function update(mixed $id, array $data): bool
+    public static function update($id, array $data): bool
     {
         $fillable = (new static())->fillable;
         $updates = [];
@@ -123,7 +123,7 @@ class MasterChecksheet extends Model
     /**
      * Delete Checksheet (static method with mixed $id - compatible with parent)
      */
-    public static function delete(mixed $id): bool
+    public static function delete($id): bool
     {
         $sql = "DELETE FROM master_checksheet WHERE id = ?";
         try {

@@ -88,7 +88,7 @@ class MasterATK extends Model
     /**
      * Update ATK
      */
-    public static function update(mixed $id, array $data): bool
+    public static function update($id, array $data): bool
     {
         $fillable = (new static())->fillable;
         $updates = [];
@@ -123,7 +123,7 @@ class MasterATK extends Model
     /**
      * Delete ATK
      */
-    public static function delete(mixed $id): bool
+    public static function delete($id): bool
     {
         $sql = "DELETE FROM master_atk WHERE id = ?";
         try {

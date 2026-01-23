@@ -233,7 +233,7 @@ class User extends Model
     /**
      * Update a user by ID
      */
-    public static function update(mixed $id, array $data): bool
+    public static function update($id, array $data): bool
     {
         if (isset($data['password'])) {
             $data['password'] = Security::hashPassword($data['password']);
@@ -268,7 +268,7 @@ class User extends Model
     /**
      * Delete a user by ID
      */
-    public static function delete(mixed $id): bool
+    public static function delete($id): bool
     {
         $sql = "DELETE FROM users WHERE id = ?";
         try {

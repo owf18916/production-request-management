@@ -51,7 +51,7 @@ class RequestChecksheet extends Model
     /**
      * Find by ID
      */
-    public static function findById(mixed $id): ?object
+    public static function findById($id)
     {
         $sql = "SELECT rc.*, mc.nama_checksheet, u.full_name, ua.full_name as approved_by_name
                 FROM request_checksheet rc
@@ -94,7 +94,7 @@ class RequestChecksheet extends Model
     /**
      * Update request checksheet
      */
-    public static function update(mixed $id, array $data): bool
+    public static function update($id, array $data): bool
     {
         $fillable = (new static())->fillable;
         $updates = [];
@@ -128,7 +128,7 @@ class RequestChecksheet extends Model
     /**
      * Update status with history
      */
-    public static function updateStatus(mixed $id, string $status, int $userId, ?string $notes = null): bool
+    public static function updateStatus($id, string $status, int $userId, $notes = null): bool
     {
         try {
             // Update status
@@ -170,7 +170,7 @@ class RequestChecksheet extends Model
     /**
      * Get history for request checksheet
      */
-    public static function getHistory(mixed $requestId): array
+    public static function getHistory($requestId): array
     {
         $sql = "SELECT rch.*, u.full_name 
                 FROM request_checksheet_history rch

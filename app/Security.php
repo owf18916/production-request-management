@@ -31,7 +31,7 @@ class Security
     /**
      * Escape HTML to prevent XSS
      */
-    public static function escape(mixed $value): string
+    public static function escape($value)
     {
         if (is_array($value)) {
             return '';
@@ -43,15 +43,21 @@ class Security
     /**
      * Sanitize input to prevent XSS
      */
-    public static function sanitize(string $input, string $type = 'string'): mixed
+    public static function sanitize(string $input, string $type = 'string')
     {
-        return match ($type) {
-            'email' => filter_var($input, FILTER_SANITIZE_EMAIL),
-            'url' => filter_var($input, FILTER_SANITIZE_URL),
-            'int' => filter_var($input, FILTER_SANITIZE_NUMBER_INT),
-            'float' => filter_var($input, FILTER_SANITIZE_NUMBER_FLOAT),
-            default => htmlspecialchars($input, ENT_QUOTES, 'UTF-8'),
-        };
+        // PHP 7.4 compatible - replace match() with switch
+        switch ($type) {
+            case 'email':
+                return filter_var($input, FILTER_SANITIZE_EMAIL);
+            case 'url':
+                return filter_var($input, FILTER_SANITIZE_URL);
+            case 'int':
+                return filter_var($input, FILTER_SANITIZE_NUMBER_INT);
+            case 'float':
+                return filter_var($input, FILTER_SANITIZE_NUMBER_FLOAT);
+            default:
+                return htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+        }
     }
 
     /**

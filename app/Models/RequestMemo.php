@@ -50,7 +50,7 @@ class RequestMemo extends Model
     /**
      * Find by ID
      */
-    public static function findById(mixed $id): ?object
+    public static function findById($id)
     {
         $sql = "SELECT rm.*, u1.full_name as requester, u2.full_name as approver 
                 FROM request_memo rm
@@ -92,7 +92,7 @@ class RequestMemo extends Model
     /**
      * Update status - STATIC method with MIXED $id
      */
-    public static function updateStatus(mixed $id, string $status, int $userId, ?string $notes = null): bool
+    public static function updateStatus($id, string $status, int $userId, $notes = null): bool
     {
         $approved_at = ($status === 'approved') ? date('Y-m-d H:i:s') : null;
         $approved_by = ($status === 'approved') ? $userId : null;
@@ -123,7 +123,7 @@ class RequestMemo extends Model
     /**
      * Delete - STATIC method with MIXED $id
      */
-    public static function delete(mixed $id): bool
+    public static function delete($id): bool
     {
         $sql = "DELETE FROM request_memo WHERE id = ?";
         try {

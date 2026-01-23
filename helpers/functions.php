@@ -64,7 +64,7 @@ function env(string $key, $default = null)
  * Dump variable and die
  */
 if (!function_exists('dd')) {
-function dd(mixed ...$vars): void
+function dd(...$vars)
 {
     foreach ($vars as $var) {
         echo '<pre>';
@@ -79,7 +79,7 @@ function dd(mixed ...$vars): void
  * Dump variable
  */
 if (!function_exists('dump')) {
-function dump(mixed ...$vars): void
+function dump(...$vars)
 {
     foreach ($vars as $var) {
         echo '<pre>';
@@ -93,7 +93,7 @@ function dump(mixed ...$vars): void
  * Escape HTML output
  */
 if (!function_exists('e')) {
-function e(mixed $value): string
+function e($value)
 {
     return \App\Security::escape($value);
 }
@@ -158,7 +158,7 @@ function verifyCsrf(string $token): bool
  * Get flash message
  */
 if (!function_exists('getFlash')) {
-function getFlash(string $key, mixed $default = null): mixed
+function getFlash(string $key, $default = null)
 {
     return \App\Session::getFlash($key, $default);
 }
@@ -179,7 +179,7 @@ function hasFlash(string $key): bool
  * Get session data
  */
 if (!function_exists('session')) {
-function session(string $key = null, mixed $default = null): mixed
+function session(string $key = null, $default = null)
 {
     if ($key === null) {
         return \App\Session::all();
@@ -213,7 +213,7 @@ function verifyPassword(string $password, string $hash): bool
  * Get config value
  */
 if (!function_exists('config')) {
-function config(string $key, mixed $default = null): mixed
+function config(string $key, $default = null)
 {
     $parts = explode('.', $key);
     $file = array_shift($parts);
@@ -241,7 +241,7 @@ function config(string $key, mixed $default = null): mixed
  * Check if value is empty
  */
 if (!function_exists('isEmpty')) {
-function isEmpty(mixed $value): bool
+function isEmpty($value)
 {
     if (is_array($value)) {
         return empty($value);
@@ -272,7 +272,7 @@ function randomString(int $length = 32): string
  * Array get with dot notation
  */
 if (!function_exists('arrayGet')) {
-function arrayGet(array $array, string $key, mixed $default = null): mixed
+function arrayGet(array $array, string $key, $default = null)
 {
     $keys = explode('.', $key);
 
@@ -310,7 +310,7 @@ function arrayHas(array $array, string $key): bool
  * Format date
  */
 if (!function_exists('formatDate')) {
-function formatDate(mixed $date, string $format = 'Y-m-d H:i:s'): string
+function formatDate($date, string $format = 'Y-m-d H:i:s')
 {
     if ($date instanceof DateTime) {
         return $date->format($format);

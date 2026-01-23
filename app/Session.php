@@ -43,7 +43,7 @@ class Session
     /**
      * Put data into session
      */
-    public static function put(string $key, mixed $value): void
+    public static function put(string $key, $value)
     {
         self::start();
         $_SESSION[$key] = $value;
@@ -52,7 +52,7 @@ class Session
     /**
      * Get data from session
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public static function get(string $key, $default = null)
     {
         self::start();
         return $_SESSION[$key] ?? $default;
@@ -79,7 +79,7 @@ class Session
     /**
      * Flash data - data that will be available only on next request
      */
-    public static function flash(string $key, mixed $value): void
+    public static function flash(string $key, $value)
     {
         self::start();
         $_SESSION['_flash'][$key] = $value;
@@ -88,7 +88,7 @@ class Session
     /**
      * Get flashed data
      */
-    public static function getFlash(string $key, mixed $default = null): mixed
+    public static function getFlash(string $key, $default = null)
     {
         self::start();
         $value = $_SESSION['_flash'][$key] ?? $default;

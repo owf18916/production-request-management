@@ -53,7 +53,7 @@ abstract class Model
     /**
      * Find by primary key
      */
-    public static function find(mixed $id): ?object
+    public static function find($id)
     {
         $instance = new static();
         $sql = "SELECT * FROM {$instance->table} WHERE {$instance->primaryKey} = ?";
@@ -63,7 +63,7 @@ abstract class Model
     /**
      * Find by attribute
      */
-    public static function findBy(string $attribute, mixed $value): ?object
+    public static function findBy(string $attribute, $value)
     {
         $instance = new static();
         $sql = "SELECT * FROM {$instance->table} WHERE $attribute = ?";
@@ -134,7 +134,7 @@ abstract class Model
     /**
      * Update a record
      */
-    public static function update(mixed $id, array $data): bool
+    public static function update($id, array $data): bool
     {
         $instance = new static();
         $fillable = $instance->fillable;
@@ -159,7 +159,7 @@ abstract class Model
     /**
      * Delete a record
      */
-    public static function delete(mixed $id): bool
+    public static function delete($id): bool
     {
         $instance = new static();
         $sql = "DELETE FROM {$instance->table} WHERE {$instance->primaryKey} = ?";
@@ -188,7 +188,7 @@ abstract class Model
     /**
      * Set attribute
      */
-    public function __set(string $key, mixed $value): void
+    public function __set(string $key, $value)
     {
         $this->attributes[$key] = $value;
     }
@@ -196,7 +196,7 @@ abstract class Model
     /**
      * Get attribute
      */
-    public function __get(string $key): mixed
+    public function __get(string $key)
     {
         return $this->attributes[$key] ?? null;
     }

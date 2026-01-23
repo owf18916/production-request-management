@@ -78,7 +78,7 @@ abstract class Controller
     /**
      * Get request input
      */
-    protected function input(string $key = null): mixed
+    protected function input(string $key = null)
     {
         $input = [];
 
@@ -134,10 +134,10 @@ abstract class Controller
     /**
      * Validate individual rule
      */
-    private function validateRule(string $field, mixed $value, string $rule, array &$errors): void
+    private function validateRule(string $field, $value, string $rule, array &$errors): void
     {
-        if (str_contains($rule, ':')) {
-            [$rule, $param] = explode(':', $rule);
+        if (strpos($rule, ':') !== false) {
+            list($rule, $param) = explode(':', $rule);
         }
 
         switch ($rule) {
@@ -183,7 +183,7 @@ abstract class Controller
     /**
      * Set view data
      */
-    protected function with(string $key, mixed $value): self
+    protected function with(string $key, $value): self
     {
         $this->data[$key] = $value;
         return $this;

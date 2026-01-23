@@ -61,7 +61,7 @@ class RequestID extends Model
     /**
      * Find by ID
      */
-    public static function findById(mixed $id): ?object
+    public static function findById($id)
     {
         $sql = "SELECT rid.*, u1.full_name as requester, u2.full_name as approver 
                 FROM request_id rid
@@ -107,7 +107,7 @@ class RequestID extends Model
     /**
      * Update status - STATIC method with MIXED $id
      */
-    public static function updateStatus(mixed $id, string $status, int $userId, ?string $notes = null): bool
+    public static function updateStatus($id, string $status, int $userId, $notes = null): bool
     {
         $approvedAt = null;
         if ($status === 'approved' || $status === 'completed') {
