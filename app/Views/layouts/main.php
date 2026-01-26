@@ -7,10 +7,10 @@
     <title><?php echo isset($title) ? e($title) . ' - ' : ''; echo e(config('app.name', 'Production Request Management System')); ?></title>
 
     <!-- Tailwind & Style CSS -->
-    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('css/style.css'); ?>">
 
     <!-- Alpine.js - Local version -->
-    <script src="<?php echo asset('js/app.js'); ?>" defer></script>
+    <script src="<?php echo url('js/app.js'); ?>" defer></script>
 </head>
 <body class="bg-gray-50" x-data>
     <!-- Header Navigation -->
