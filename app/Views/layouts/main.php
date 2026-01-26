@@ -6,14 +6,11 @@
     <meta name="csrf-token" content="<?php echo e(csrfToken()); ?>">
     <title><?php echo isset($title) ? e($title) . ' - ' : ''; echo e(config('app.name', 'Production Request Management System')); ?></title>
 
-    <!-- TailwindCSS - Compiled locally -->
-    <link rel="stylesheet" href="<?php echo asset('css/tailwind.css'); ?>">
+    <!-- Tailwind & Style CSS -->
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 
     <!-- Alpine.js - Local version -->
-    <script src="<?php echo asset('js/alpine.js'); ?>" defer></script>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
+    <script src="<?php echo asset('js/app.js'); ?>" defer></script>
 </head>
 <body class="bg-gray-50" x-data>
     <!-- Header Navigation -->
