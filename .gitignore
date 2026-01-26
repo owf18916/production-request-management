@@ -35,10 +35,13 @@ Thumbs.db
 node_modules/
 npm-debug.log
 yarn-error.log
+package-lock.json
 
 # Build artifacts
 dist/
 build/
+public/assets/css/tailwind.css
+public/assets/js/alpine.js
 
 # Cache files
 .cache/

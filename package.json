@@ -1,0 +1,21 @@
+{
+  "name": "production-request-management",
+  "version": "1.0.0",
+  "description": "Production Request Management System",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -i ./resources/css/input.css -o ./public/assets/css/tailwind.css --watch",
+    "build": "tailwindcss -i ./resources/css/input.css -o ./public/assets/css/tailwind.css --minify && node prepare-assets.js",
+    "postinstall": "node prepare-assets.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.32"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.3"
+  }
+}
