@@ -6,11 +6,12 @@
     <meta name="csrf-token" content="<?php echo e(csrfToken()); ?>">
     <title><?php echo isset($title) ? e($title) . ' - ' : ''; echo e(config('app.name', 'Production Request Management System')); ?></title>
 
-    <!-- TailwindCSS - Compiled locally -->
+    <!-- Tailwind (built) and Custom Styles -->
+    <link rel="stylesheet" href="<?php echo url('assets/css/tailwind.css'); ?>">
     <link rel="stylesheet" href="<?php echo url('css/style.css'); ?>">
 
-    <!-- Alpine.js - Local version -->
-    <script src="<?php echo url('js/app.js'); ?>" defer></script>
+    <!-- Alpine.js (local build) -->
+    <script src="<?php echo url('assets/js/alpine.js'); ?>" defer></script>
 </head>
 <body class="bg-gray-50">
 <div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -149,55 +150,58 @@
             &copy; <?php echo date('Y'); ?> Production Request Management System
         </p>
     </div>
-</div>
-</body>
-</html>
-
-<script>
-    function loginForm() {
-        return {
-            form: {
-                identifier: '',
-                password: '',
-            },
-            errors: {
-                identifier: '',
-                password: '',
-            },
-            showPassword: false,
-            loading: false,
-            
-            get isFormValid() {
-                return this.form.identifier.trim().length > 0 && 
-                       this.form.password.length >= 6 && 
-                       !this.errors.identifier && 
-                       !this.errors.password;
-            },
-            
-            validateIdentifier() {
-                if (this.form.identifier.trim().length < 2) {
-                    this.errors.identifier = 'Username or NIK must be at least 2 characters';
-                } else {
-                    this.errors.identifier = '';
-                }
-            },
-            
-            validatePassword() {
-                if (this.form.password.length < 6) {
-                    this.errors.password = 'Password must be at least 6 characters';
-                } else {
-                    this.errors.password = '';
-                }
-            },
-            
-            handleSubmit(e) {
-                this.validateIdentifier();
-                this.validatePassword();
+    <!-- Inline Alpine component and Custom JS -->
+    <script>
+        function loginForm() {
+            return {
+                form: {
+                    identifier: '',
+                    password: '',
+                },
+                errors: {
+                    identifier: '',
+                    password: '',
+                },
+                showPassword: false,
+                loading: false,
                 
-                if (!this.isFormValid) {
-                    e.preventDefault();
+                get isFormValid() {
+                    return this.form.identifier.trim().length > 0 && 
+                           this.form.password.length >= 6 && 
+                           !this.errors.identifier && 
+                           !this.errors.password;
+                },
+                
+                validateIdentifier() {
+                    if (this.form.identifier.trim().length < 2) {
+                        this.errors.identifier = 'Username or NIK must be at least 2 characters';
+                    } else {
+                        this.errors.identifier = '';
+                    }
+                },
+                
+                validatePassword() {
+                    if (this.form.password.length < 6) {
+                        this.errors.password = 'Password must be at least 6 characters';
+                    } else {
+                        this.errors.password = '';
+                    }
+                },
+                
+                handleSubmit(e) {
+                    this.validateIdentifier();
+                    this.validatePassword();
+                    
+                    if (!this.isFormValid) {
+                        e.preventDefault();
+                    }
                 }
             }
         }
-    }
-</script>
+    </script>
+
+    <!-- Custom JS -->
+    <script src="<?php echo url('js/app.js'); ?>"></script>
+</div>
+</body>
+</html>
