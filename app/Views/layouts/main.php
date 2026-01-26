@@ -67,6 +67,6 @@
     </footer>
 
     <!-- Custom JS -->
-    <script src="<?php echo asset('js/app.js'); ?>"></script>
+    <script src="<?php echo url('js/app.js'); ?>"></script>
 </body>
 </html>
