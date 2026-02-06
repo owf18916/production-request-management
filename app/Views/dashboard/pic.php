@@ -7,6 +7,108 @@
         </div>
     </div>
 
+    <!-- Conveyor & Shift Setup Alert -->
+    <div id="conveyor-alert" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6" x-data="conveyorSetupForm()" x-init="loadActiveConveyor()">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h3 class="text-sm font-medium text-blue-800">Setup Conveyor & Shift untuk Request</h3>
+                    <div class="mt-2 text-sm text-blue-700" x-show="!activeConveyor">
+                        <p class="mb-3">⚠️ Anda belum setup Conveyor dan Shift. Harap setup terlebih dahulu sebelum membuat request.</p>
+                        <button 
+                            @click="setupModal = true"
+                            type="button"
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                            Setup Sekarang
+                        </button>
+                    </div>
+                    <div class="mt-2 text-sm text-blue-700" x-show="activeConveyor">
+                        <p class="mb-3">✓ <strong>Setup Aktif:</strong> Conveyor: <span x-text="activeConveyor"></span>, Shift: <span x-text="activeShift"></span></p>
+                        <button 
+                            @click="setupModal = true"
+                            type="button"
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 mr-2"
+                        >
+                            Ubah Setup
+                        </button>
+                        <button 
+                            @click="clearConveyor()"
+                            type="button"
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Hapus Setup
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setup Modal -->
+            <div x-show="setupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" @click="setupModal = false">
+                <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4" @click.stop>
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Setup Conveyor & Shift</h3>
+                        
+                        <!-- Conveyor Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Conveyor</label>
+                            <select 
+                                x-model="formData.conveyor_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">-- Pilih Conveyor --</option>
+                                <template x-for="conveyor in conveyors" :key="conveyor.id">
+                                    <option :value="conveyor.id" x-text="conveyor.conveyor_name"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Shift Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
+                            <select 
+                                x-model="formData.shift"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">-- Pilih Shift --</option>
+                                <option value="Shift A">Shift A</option>
+                                <option value="Shift B">Shift B</option>
+                            </select>
+                        </div>
+
+                        <!-- Message -->
+                        <div x-show="message" class="mb-4 p-3 rounded-md" :class="message.includes('successfully') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'">
+                            <p class="text-sm" x-text="message"></p>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex gap-3">
+                            <button 
+                                @click="setupConveyor()"
+                                type="button"
+                                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                            >
+                                Simpan Setup
+                            </button>
+                            <button 
+                                @click="setupModal = false; message = ''"
+                                type="button"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 font-medium"
+                            >
+                                Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         
@@ -260,3 +362,78 @@
     </div>
 
 </div>
+
+<script>
+function conveyorSetupForm() {
+    return {
+        setupModal: false,
+        conveyors: <?php echo json_encode($conveyors ?? []); ?>,
+        formData: { conveyor_id: '', shift: '' },
+        message: '',
+        activeConveyor: null,
+        activeShift: null,
+
+        loadActiveConveyor() {
+            fetch('<?php echo url('dashboard/get-active-conveyor-shift'); ?>')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.has_active) {
+                        this.activeConveyor = data.conveyor_name;
+                        this.activeShift = data.shift;
+                    }
+                })
+                .catch(e => console.error('Error loading conveyor:', e));
+        },
+
+        setupConveyor() {
+            if (!this.formData.conveyor_id || !this.formData.shift) {
+                this.message = 'Harap pilih Conveyor dan Shift';
+                return;
+            }
+            
+            const conveyorName = this.conveyors.find(c => c.id == this.formData.conveyor_id)?.conveyor_name;
+            
+            fetch('<?php echo url('dashboard/setup-conveyor-shift'); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    conveyor_id: this.formData.conveyor_id,
+                    conveyor_name: conveyorName,
+                    shift: this.formData.shift
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.message = data.message;
+                    this.activeConveyor = data.conveyor_name;
+                    this.activeShift = data.shift;
+                    this.formData = { conveyor_id: '', shift: '' };
+                    setTimeout(() => { 
+                        this.setupModal = false; 
+                        this.message = ''; 
+                    }, 1500);
+                } else {
+                    this.message = data.message || 'Error setting up conveyor/shift';
+                }
+            })
+            .catch(e => { 
+                this.message = 'Error: ' + e.message;
+                console.error(e);
+            });
+        },
+
+        clearConveyor() {
+            fetch('<?php echo url('dashboard/clear-conveyor-shift'); ?>', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        this.activeConveyor = null;
+                        this.activeShift = null;
+                    }
+                })
+                .catch(e => console.error('Error clearing conveyor:', e));
+        }
+    };
+}
+</script>

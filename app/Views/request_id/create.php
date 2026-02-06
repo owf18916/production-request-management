@@ -1,333 +1,378 @@
 <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900">Create ID Request</h1>
-            <p class="mt-2 text-gray-600">Submit a new ID request</p>
+            <p class="mt-2 text-gray-600">Submit a new ID request with multiple items</p>
         </div>
 
         <!-- Form -->
-        <form method="POST" action="<?php echo url('/request-id/store'); ?>" x-data="requestForm()" x-init="initForm()" class="bg-white rounded-lg shadow p-8">
-            <!-- CSRF Token -->
-            <input type="hidden" name="_csrf_token" value="<?php echo csrfToken(); ?>">
-
-            <!-- ID Type Selection -->
-            <div class="mb-6">
-                <label class="block text-lg font-medium text-gray-900 mb-4">Select ID Type</label>
-                
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <input type="radio" id="id_punggung" name="id_type" value="id_punggung" 
-                               @change="selectedType = 'id_punggung'" 
-                               <?php echo ($formData['id_type'] ?? '') === 'id_punggung' ? 'checked' : ''; ?>
-                               class="h-4 w-4 text-blue-600">
-                        <label for="id_punggung" class="ml-3 text-gray-700 font-medium cursor-pointer">
-                            ID Punggung
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" id="pin_4m" name="id_type" value="pin_4m" 
-                               @change="selectedType = 'pin_4m'" 
-                               <?php echo ($formData['id_type'] ?? '') === 'pin_4m' ? 'checked' : ''; ?>
-                               class="h-4 w-4 text-blue-600">
-                        <label for="pin_4m" class="ml-3 text-gray-700 font-medium cursor-pointer">
-                            PIN 4M
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" id="id_kaki" name="id_type" value="id_kaki" 
-                               @change="selectedType = 'id_kaki'" 
-                               <?php echo ($formData['id_type'] ?? '') === 'id_kaki' ? 'checked' : ''; ?>
-                               class="h-4 w-4 text-blue-600">
-                        <label for="id_kaki" class="ml-3 text-gray-700 font-medium cursor-pointer">
-                            ID Kaki
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" id="job_psd" name="id_type" value="job_psd" 
-                               @change="selectedType = 'job_psd'" 
-                               <?php echo ($formData['id_type'] ?? '') === 'job_psd' ? 'checked' : ''; ?>
-                               class="h-4 w-4 text-blue-600">
-                        <label for="job_psd" class="ml-3 text-gray-700 font-medium cursor-pointer">
-                            Job PSD
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="radio" id="id_other" name="id_type" value="id_other" 
-                               @change="selectedType = 'id_other'" 
-                               <?php echo ($formData['id_type'] ?? '') === 'id_other' ? 'checked' : ''; ?>
-                               class="h-4 w-4 text-blue-600">
-                        <label for="id_other" class="ml-3 text-gray-700 font-medium cursor-pointer">
-                            ID Other
-                        </label>
-                    </div>
-                </div>
-
-                <?php if (isset($errors['id_type'])): ?>
-                    <p class="mt-2 text-sm text-red-600"><?php echo htmlspecialchars($errors['id_type']); ?></p>
-                <?php endif; ?>
-            </div>
-
-            <!-- Dynamic Form Fields -->
-            <div x-show="selectedType" class="mb-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                <!-- ID Punggung Fields -->
-                <div x-show="selectedType === 'id_punggung'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow p-8" x-data="requestForm()">
+            <!-- Active Conveyor & Shift Info -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
                     <div>
-                        <label for="job" class="block text-sm font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
-                        <input type="text" id="job" name="job" value="<?php echo htmlspecialchars($formData['job'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['job'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['job']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="keterangan_punggung" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                        <select id="keterangan_punggung" name="keterangan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select...</option>
-                            <option value="Asli" <?php echo ($formData['keterangan'] ?? '') === 'Asli' ? 'selected' : ''; ?>>Asli</option>
-                            <option value="Perbaikan" <?php echo ($formData['keterangan'] ?? '') === 'Perbaikan' ? 'selected' : ''; ?>>Perbaikan</option>
-                        </select>
-                        <?php if (isset($errors['keterangan'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['keterangan']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="qty_punggung" class="block text-sm font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                        <input type="number" id="qty_punggung" name="qty" value="<?php echo htmlspecialchars($formData['qty'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['qty'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['qty']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="warna" class="block text-sm font-medium text-gray-700 mb-1">Warna <span class="text-red-600">*</span></label>
-                        <input type="text" id="warna" name="warna" value="<?php echo htmlspecialchars($formData['warna'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['warna'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['warna']); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- PIN 4M Fields -->
-                <div x-show="selectedType === 'pin_4m'" class="space-y-4">
-                    <div>
-                        <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-600">*</span></label>
-                        <input type="text" id="nama" name="nama" value="<?php echo htmlspecialchars($formData['nama'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['nama'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['nama']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="nik" class="block text-sm font-medium text-gray-700 mb-1">NIK <span class="text-red-600">*</span></label>
-                        <input type="text" id="nik" name="nik" value="<?php echo htmlspecialchars($formData['nik'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['nik'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['nik']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="matrix_skill" class="block text-sm font-medium text-gray-700 mb-1">Matrix Skill <span class="text-red-600">*</span></label>
-                        <input type="text" id="matrix_skill" name="matrix_skill" value="<?php echo htmlspecialchars($formData['matrix_skill'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['matrix_skill'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['matrix_skill']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="keterangan_pin" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                        <select id="keterangan_pin" name="keterangan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select...</option>
-                            <option value="Bulat" <?php echo ($formData['keterangan'] ?? '') === 'Bulat' ? 'selected' : ''; ?>>Bulat</option>
-                            <option value="Kotak" <?php echo ($formData['keterangan'] ?? '') === 'Kotak' ? 'selected' : ''; ?>>Kotak</option>
-                        </select>
-                        <?php if (isset($errors['keterangan'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['keterangan']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="pin" class="block text-sm font-medium text-gray-700 mb-1">PIN <span class="text-red-600">*</span></label>
-                        <input type="text" id="pin" name="pin" value="<?php echo htmlspecialchars($formData['pin'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['pin'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['pin']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="qty_pin" class="block text-sm font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                        <input type="number" id="qty_pin" name="qty" value="<?php echo htmlspecialchars($formData['qty'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['qty'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['qty']); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- ID Kaki Fields -->
-                <div x-show="selectedType === 'id_kaki'" class="space-y-4">
-                    <div>
-                        <label for="job_kaki" class="block text-sm font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
-                        <input type="text" id="job_kaki" name="job" value="<?php echo htmlspecialchars($formData['job'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['job'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['job']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="keterangan_kaki" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                        <select id="keterangan_kaki" name="keterangan" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select...</option>
-                            <option value="Bulat" <?php echo ($formData['keterangan'] ?? '') === 'Bulat' ? 'selected' : ''; ?>>Bulat</option>
-                            <option value="Kotak" <?php echo ($formData['keterangan'] ?? '') === 'Kotak' ? 'selected' : ''; ?>>Kotak</option>
-                        </select>
-                        <?php if (isset($errors['keterangan'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['keterangan']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="qty_kaki" class="block text-sm font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                        <input type="number" id="qty_kaki" name="qty" value="<?php echo htmlspecialchars($formData['qty'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['qty'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['qty']); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Job PSD Fields -->
-                <div x-show="selectedType === 'job_psd'" class="space-y-4">
-                    <div>
-                        <label for="remarks" class="block text-sm font-medium text-gray-700 mb-1">Remarks <span class="text-red-600">*</span></label>
-                        <textarea id="remarks" name="remarks" rows="5" 
-                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($formData['remarks'] ?? ''); ?></textarea>
-                        <?php if (isset($errors['remarks'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['remarks']); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- ID Other Fields -->
-                <div x-show="selectedType === 'id_other'" class="space-y-4">
-                    <div>
-                        <label for="nama_id" class="block text-sm font-medium text-gray-700 mb-1">Nama ID <span class="text-red-600">*</span></label>
-                        <input type="text" id="nama_id" name="nama_id" value="<?php echo htmlspecialchars($formData['nama_id'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['nama_id'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['nama_id']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="panjang" class="block text-sm font-medium text-gray-700 mb-1">Panjang (cm) <span class="text-red-600">*</span></label>
-                        <input type="number" id="panjang" name="panjang" value="<?php echo htmlspecialchars($formData['panjang'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['panjang'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['panjang']); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <div>
-                        <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">Lebar (cm) <span class="text-red-600">*</span></label>
-                        <input type="number" id="lebar" name="lebar" value="<?php echo htmlspecialchars($formData['lebar'] ?? ''); ?>" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <?php if (isset($errors['lebar'])): ?>
-                            <p class="mt-1 text-sm text-red-600"><?php echo htmlspecialchars($errors['lebar']); ?></p>
-                        <?php endif; ?>
+                        <p class="text-sm font-medium text-blue-900">Active Setup:</p>
+                        <p class="text-sm text-blue-700">
+                            Conveyor: <strong><?php echo htmlspecialchars($active_conveyor_name); ?></strong> | 
+                            Shift: <strong><?php echo htmlspecialchars($active_shift); ?></strong>
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Notes (Optional) -->
-            <div class="mb-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Add any additional information..."
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            </div>
+            <form method="POST" id="request-form" action="<?php echo url('request_id/store'); ?>">
+                <input type="hidden" name="_csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
 
-            <!-- Conveyor Selection -->
-            <div class="mb-6">
-                <label for="conveyor_id" class="block text-sm font-medium text-gray-700 mb-2">
-                    Conveyor <span class="text-gray-500">(optional)</span>
-                </label>
-                <?php if (isset($errors['conveyor_id'])): ?>
-                    <div class="p-3 mb-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                        <?php echo $errors['conveyor_id']; ?>
+                <!-- Items Container -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">ID Items</h2>
+                    
+                    <div id="items-container" x-ref="itemsContainer">
+                        <!-- Items will be added here -->
                     </div>
-                <?php endif; ?>
-                <select 
-                    id="conveyor_id"
-                    name="conveyor_id" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="">-- Select Conveyor --</option>
-                    <?php if (isset($conveyors)): ?>
-                        <?php foreach ($conveyors as $conveyor): ?>
-                            <option value="<?php echo $conveyor->id; ?>" <?php echo (isset($formData['conveyor_id']) && $formData['conveyor_id'] == $conveyor->id) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($conveyor->conveyor_name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
-            </div>
 
-            <!-- Shift Selection -->
-            <div class="mb-6">
-                <label for="shift" class="block text-sm font-medium text-gray-700 mb-2">
-                    Shift <span class="text-gray-500">(optional)</span>
-                </label>
-                <?php if (isset($errors['shift'])): ?>
-                    <div class="p-3 mb-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                        <?php echo $errors['shift']; ?>
-                    </div>
-                <?php endif; ?>
-                <select 
-                    id="shift"
-                    name="shift" 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="">-- Select Shift --</option>
-                    <?php if (isset($shifts)): ?>
-                        <?php foreach ($shifts as $shiftOption): ?>
-                            <option value="<?php echo $shiftOption; ?>" <?php echo (isset($formData['shift']) && $formData['shift'] === $shiftOption) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($shiftOption); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
-            </div>
+                    <!-- Add Item Button -->
+                    <button 
+                        type="button" 
+                        @click="addItem()"
+                        class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                        + Add Item
+                    </button>
+                </div>
 
-            <!-- Buttons -->
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
-                    Submit Request
-                </button>
-                <a href="<?php echo url('/request-id'); ?>" class="flex-1 bg-gray-300 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-400 font-medium text-center">
-                    Cancel
-                </a>
-            </div>
-        </form>
+                <!-- Submit Button -->
+                <div class="flex gap-3">
+                    <button 
+                        type="button"
+                        id="submit-btn"
+                        onclick="submitForm(event)"
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"
+                    >
+                        Submit Request
+                    </button>
+                    <a 
+                        href="<?php echo url('request_id'); ?>"
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg text-center"
+                    >
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Alpine.js is loaded from main layout -->
 <script>
 function requestForm() {
     return {
-        selectedType: '<?php echo $formData['id_type'] ?? ''; ?>',
-        initForm() {
-            // Initialize form state
+        init() {
+            this.addItem();
+        },
+        addItem() {
+            const itemsContainer = document.getElementById('items-container');
+            const index = itemsContainer.children.length;
+            
+            const itemHtml = `
+                <div class="item-row mb-6 p-4 border border-gray-200 rounded-lg" x-ref="itemRow_${index}">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-medium text-gray-900">Item <span class="item-number">${index + 1}</span></h3>
+                        ${index > 0 ? `<button type="button" onclick="removeItemByElement(this)" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>` : ''}
+                    </div>
+
+                    <!-- ID Type Selection -->
+                    <div class="mb-4" x-data="{ type: '' }">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            ID Type <span class="text-red-600">*</span>
+                        </label>
+                        
+                        <select 
+                            name="items[${index}][id_type]"
+                            @change="type = $event.target.value"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 mb-4"
+                        >
+                            <option value="">-- Select Type --</option>
+                            <option value="id_punggung">ID Punggung</option>
+                            <option value="pin_4m">PIN 4M</option>
+                            <option value="id_kaki">ID Kaki</option>
+                            <option value="job_psd">Job PSD</option>
+                            <option value="id_other">ID Other</option>
+                        </select>
+
+                        <!-- ID Punggung Fields -->
+                        <div x-show="type === 'id_punggung'" class="space-y-3 p-3 bg-gray-50 rounded">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][job]" placeholder="Job"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
+                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select...</option>
+                                    <option value="Asli">Asli</option>
+                                    <option value="Perbaikan">Perbaikan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Warna <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][warna]" placeholder="Warna"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- PIN 4M Fields -->
+                        <div x-show="type === 'pin_4m'" class="space-y-3 p-3 bg-gray-50 rounded">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nama <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][nama]" placeholder="Nama"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">NIK <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][nik]" placeholder="NIK"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Matrix Skill <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][matrix_skill]" placeholder="Matrix Skill"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
+                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select...</option>
+                                    <option value="Bulat">Bulat</option>
+                                    <option value="Kotak">Kotak</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">PIN <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][pin]" placeholder="PIN"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- ID Kaki Fields -->
+                        <div x-show="type === 'id_kaki'" class="space-y-3 p-3 bg-gray-50 rounded">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][job]" placeholder="Job"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
+                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select...</option>
+                                    <option value="Bulat">Bulat</option>
+                                    <option value="Kotak">Kotak</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- Job PSD Fields -->
+                        <div x-show="type === 'job_psd'" class="space-y-3 p-3 bg-gray-50 rounded">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Remarks <span class="text-red-600">*</span></label>
+                                <textarea name="items[${index}][remarks]" placeholder="Remarks" rows="2"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- ID Other Fields -->
+                        <div x-show="type === 'id_other'" class="space-y-3 p-3 bg-gray-50 rounded">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nama ID <span class="text-red-600">*</span></label>
+                                <input type="text" name="items[${index}][nama_id]" placeholder="Nama ID"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Panjang (cm) <span class="text-red-600">*</span></label>
+                                <input type="number" name="items[${index}][panjang]" placeholder="Panjang" min="0" step="0.1"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Lebar (cm) <span class="text-red-600">*</span></label>
+                                <input type="number" name="items[${index}][lebar]" placeholder="Lebar" min="0" step="0.1"
+                                    class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea 
+                            name="items[${index}][notes]"
+                            rows="2"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Optional notes for this item"
+                        ></textarea>
+                    </div>
+                </div>
+            `;
+            
+            itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+            updateItemNumbers();
         }
-    };
+    }
 }
+
+function removeItemByElement(btn) {
+    btn.closest('.item-row').remove();
+    updateItemNumbers();
+}
+
+function updateItemNumbers() {
+    const itemRows = document.querySelectorAll('.item-row');
+    itemRows.forEach((row, index) => {
+        row.querySelector('.item-number').textContent = index + 1;
+        // Update input names
+        row.querySelectorAll('[name]').forEach(input => {
+            const oldName = input.name;
+            input.name = oldName.replace(/items\[\d+\]/, `items[${index}]`);
+        });
+        
+        // Remove delete button from first item
+        const deleteBtn = row.querySelector('button[onclick*="removeItemByElement"]');
+        if (index === 0 && deleteBtn) {
+            deleteBtn.remove();
+        } else if (index > 0 && !deleteBtn) {
+            const header = row.querySelector('.flex');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.onclick = function() { removeItemByElement(this); };
+            btn.className = 'text-red-600 hover:text-red-800 text-sm font-medium';
+            btn.textContent = 'Delete';
+            header.appendChild(btn);
+        }
+    });
+}
+
+function submitForm(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('request-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const originalText = submitBtn.textContent;
+    
+    // Collect form data
+    const formData = new FormData(form);
+    
+    // Convert FormData to JSON-compatible object
+    const data = {};
+    const items = [];
+    
+    for (let [key, value] of formData.entries()) {
+        if (key.startsWith('items[')) {
+            // Parse items[0][id_type] format
+            const match = key.match(/items\[(\d+)\]\[(\w+)\]/);
+            if (match) {
+                const index = parseInt(match[1]);
+                const field = match[2];
+                if (!items[index]) items[index] = {};
+                items[index][field] = value;
+            }
+        } else {
+            data[key] = value;
+        }
+    }
+    
+    // Filter out empty items
+    data.items = items.filter(item => item !== undefined);
+    
+    // Validate
+    if (!data.items || data.items.length === 0) {
+        showToast('Minimal harus ada 1 item', 'error');
+        return;
+    }
+    
+    // Check all items have id_type
+    for (let i = 0; i < data.items.length; i++) {
+        if (!data.items[i].id_type) {
+            showToast('Item ' + (i + 1) + ': Pilih ID Type', 'error');
+            return;
+        }
+    }
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    
+    // Submit via AJAX
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(r => {
+        return r.json().then(resp => {
+            if (resp.success) {
+                showToast('Request berhasil dibuat!', 'success');
+                setTimeout(() => {
+                    window.location.href = '<?php echo url('request_id'); ?>';
+                }, 1500);
+            } else {
+                // Show error with details if available
+                let errorMsg = resp.error || 'Gagal membuat request';
+                if (resp.details && Array.isArray(resp.details) && resp.details.length > 0) {
+                    errorMsg = resp.details.join('\n');
+                }
+                showToast(errorMsg, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    })
+    .catch(e => {
+        showToast('Gagal membuat request: ' + e.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+}
+
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500' :
+        type === 'error' ? 'bg-red-500' :
+        'bg-blue-500'
+    }`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const form = requestForm();
+    form.init();
+});
 </script>

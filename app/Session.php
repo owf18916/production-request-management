@@ -139,4 +139,64 @@ class Session
         self::start();
         return $_SESSION;
     }
+
+    /**
+     * Set active conveyor and shift for production requests
+     */
+    public static function setActiveConveyor(int $conveyorId, string $conveyorName, string $shift): void
+    {
+        self::start();
+        $_SESSION['active_conveyor_id'] = $conveyorId;
+        $_SESSION['active_conveyor_name'] = $conveyorName;
+        $_SESSION['active_shift'] = $shift;
+    }
+
+    /**
+     * Get active conveyor ID
+     */
+    public static function getActiveConveyorId()
+    {
+        self::start();
+        return $_SESSION['active_conveyor_id'] ?? null;
+    }
+
+    /**
+     * Get active conveyor name
+     */
+    public static function getActiveConveyorName()
+    {
+        self::start();
+        return $_SESSION['active_conveyor_name'] ?? null;
+    }
+
+    /**
+     * Get active shift
+     */
+    public static function getActiveShift()
+    {
+        self::start();
+        return $_SESSION['active_shift'] ?? null;
+    }
+
+    /**
+     * Check if conveyor and shift are set
+     */
+    public static function hasActiveConveyorAndShift(): bool
+    {
+        self::start();
+        return isset($_SESSION['active_conveyor_id']) && 
+               isset($_SESSION['active_conveyor_name']) && 
+               isset($_SESSION['active_shift']);
+    }
+
+    /**
+     * Clear active conveyor and shift
+     */
+    public static function clearActiveConveyorAndShift(): void
+    {
+        self::start();
+        unset($_SESSION['active_conveyor_id']);
+        unset($_SESSION['active_conveyor_name']);
+        unset($_SESSION['active_shift']);
+    }
 }

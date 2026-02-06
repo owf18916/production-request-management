@@ -80,22 +80,26 @@ class RequestATK extends Controller
             $this->redirect(url('admin/requests/atk'), 'error', 'Admin cannot create requests from PIC view');
         }
 
-        // Get active conveyors for dropdown
-        $conveyors = ConveyorModel::getActive();
-        
-        // Shift options
-        $shifts = ['Shift A', 'Shift B'];
+        // Check if user has setup conveyor and shift
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('dashboard'), 'error', 'Harap setup Conveyor dan Shift terlebih dahulu di Dashboard');
+        }
+
+        $activeConveyorId = Session::getActiveConveyorId();
+        $activeConveyorName = Session::getActiveConveyorName();
+        $activeShift = Session::getActiveShift();
 
         $this->setTitle('Create Request ATK');
         $this->view('request_atk/create', [
             'csrf_token' => Session::generateToken(),
-            'conveyors' => $conveyors,
-            'shifts' => $shifts,
+            'active_conveyor_id' => $activeConveyorId,
+            'active_conveyor_name' => $activeConveyorName,
+            'active_shift' => $activeShift,
         ]);
     }
 
     /**
-     * Store - Save new request (PIC)
+     * Store - Save new request with multiple items (PIC)
      */
     public function store(): void
     {
@@ -105,67 +109,76 @@ class RequestATK extends Controller
             $this->redirect(url('login'));
         }
 
-        $csrfToken = $this->input('_csrf_token');
+        // Get request body - could be JSON or form-encoded
+        $rawInput = file_get_contents('php://input');
+        $input = [];
+        
+        // Try to decode as JSON first
+        if (!empty($rawInput) && $rawInput[0] === '{') {
+            $input = json_decode($rawInput, true) ?: [];
+        } else {
+            // Fall back to $_POST
+            $input = $_POST;
+        }
+
+        $csrfToken = $input['_csrf_token'] ?? null;
         if (!Session::verifyToken($csrfToken)) {
             $this->redirect(url('requests/atk/create'), 'error', 'Invalid request');
         }
 
-        $atkId = $this->input('atk_id');
-        $conveyorId = $this->input('conveyor_id');
-        $shift = $this->input('shift');
-        $qty = $this->input('qty');
-        $notes = $this->input('notes', '');
+        // Validate that conveyor and shift are setup
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('requests/atk/create'), 'error', 'Conveyor dan Shift belum di-setup');
+        }
+
+        // Get items from form (array)
+        $items = $input['items'] ?? null;
 
         $errors = [];
 
-        // Validation
-        if (!$atkId || !is_numeric($atkId)) {
-            $errors['atk_id'] = 'ATK item is required';
+        // Validate items array
+        if (!$items || !is_array($items) || empty($items)) {
+            $errors['items'] = 'Minimal harus ada 1 item';
         } else {
-            $atk = MasterATKModel::findById((int)$atkId);
-            if (!$atk) {
-                $errors['atk_id'] = 'Invalid ATK item';
+            // Validate each item
+            foreach ($items as $index => $item) {
+                if (empty($item['atk_id']) || !is_numeric($item['atk_id'])) {
+                    $errors["items.{$index}.atk_id"] = "Item " . ($index + 1) . ": ATK item harus dipilih";
+                } else {
+                    $atk = MasterATKModel::findById((int)$item['atk_id']);
+                    if (!$atk) {
+                        $errors["items.{$index}.atk_id"] = "Item " . ($index + 1) . ": ATK item tidak valid";
+                    }
+                }
+
+                if (empty($item['qty']) || !is_numeric($item['qty'])) {
+                    $errors["items.{$index}.qty"] = "Item " . ($index + 1) . ": Quantity harus diisi";
+                } elseif ((int)$item['qty'] < 1 || (int)$item['qty'] > 9999) {
+                    $errors["items.{$index}.qty"] = "Item " . ($index + 1) . ": Quantity harus antara 1-9999";
+                }
             }
-        }
-
-        if (!$qty || !is_numeric($qty)) {
-            $errors['qty'] = 'Quantity is required and must be numeric';
-        } elseif ((int)$qty < 1) {
-            $errors['qty'] = 'Quantity must be at least 1';
-        } elseif ((int)$qty > 9999) {
-            $errors['qty'] = 'Quantity cannot exceed 9999';
-        }
-
-        // Validate conveyor (optional)
-        if ($conveyorId && !is_numeric($conveyorId)) {
-            $errors['conveyor_id'] = 'Invalid conveyor selected';
-        } elseif ($conveyorId) {
-            $conveyor = ConveyorModel::findById((int)$conveyorId);
-            if (!$conveyor) {
-                $errors['conveyor_id'] = 'Selected conveyor does not exist';
-            }
-        }
-
-        // Validate shift (optional)
-        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
-            $errors['shift'] = 'Invalid shift selected';
         }
 
         if (!empty($errors)) {
-            $conveyors = ConveyorModel::getActive();
-            $shifts = ['Shift A', 'Shift B'];
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'errors' => $errors
+                ]);
+                return;
+            }
             
             $this->setTitle('Create Request ATK');
             $this->view('request_atk/create', [
                 'errors' => $errors,
                 'csrf_token' => Session::generateToken(),
-                'atk_id' => $atkId,
-                'conveyor_id' => $conveyorId,
-                'shift' => $shift,
-                'qty' => $qty,
-                'notes' => $notes,
-                'conveyors' => $conveyors,
-                'shifts' => $shifts,
+                'active_conveyor_id' => Session::getActiveConveyorId(),
+                'active_conveyor_name' => Session::getActiveConveyorName(),
+                'active_shift' => Session::getActiveShift(),
+                'items' => $items,
             ]);
             return;
         }
@@ -173,22 +186,58 @@ class RequestATK extends Controller
         // Generate request number
         $requestNumber = RequestATKModel::generateRequestNumber();
 
-        // Create request
-        $success = RequestATKModel::create([
-            'request_number' => $requestNumber,
-            'atk_id' => (int)$atkId,
-            'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
-            'shift' => $shift ?: null,
-            'qty' => (int)$qty,
-            'status' => 'pending',
-            'requested_by' => $userId,
-            'notes' => $notes ?: null,
-        ]);
+        $conveyorId = Session::getActiveConveyorId();
+        $shift = Session::getActiveShift();
+        $allSuccess = true;
+        $insertErrors = [];
 
-        if ($success) {
-            $this->redirect(url('requests/atk'), 'success', 'Request created successfully');
+        // Insert each item
+        foreach ($items as $index => $item) {
+            $success = RequestATKModel::create([
+                'request_number' => $requestNumber,
+                'atk_id' => (int)$item['atk_id'],
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
+                'qty' => (int)$item['qty'],
+                'status' => 'pending',
+                'requested_by' => $userId,
+                'notes' => $item['notes'] ?? null,
+            ]);
+
+            if (!$success) {
+                $allSuccess = false;
+                $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
+                error_log("RequestATK store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
+            }
+        }
+
+        if ($allSuccess) {
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Request dengan ' . count($items) . ' item berhasil dibuat',
+                    'redirect' => url('requests/atk')
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('requests/atk'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
         } else {
-            $this->redirect(url('requests/atk/create'), 'error', 'Failed to create request');
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Gagal membuat request: ' . implode(', ', $insertErrors),
+                    'details' => $insertErrors
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('requests/atk/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
         }
     }
 

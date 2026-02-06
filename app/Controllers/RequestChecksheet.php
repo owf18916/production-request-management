@@ -53,111 +53,170 @@ class RequestChecksheet extends Controller
      */
     public function create(): void
     {
-        $checksheets = MasterChecksheet::getAll();
-        $conveyors = ConveyorModel::getActive();
-        $shifts = ['Shift A', 'Shift B'];
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        // Check if user has setup conveyor and shift
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('dashboard'), 'error', 'Harap setup Conveyor dan Shift terlebih dahulu di Dashboard');
+        }
+
+        $activeConveyorId = Session::getActiveConveyorId();
+        $activeConveyorName = Session::getActiveConveyorName();
+        $activeShift = Session::getActiveShift();
 
         $this->setTitle('Create Request Checksheet');
         $this->view('request_checksheet/create', [
-            'checksheets' => $checksheets,
-            'conveyors' => $conveyors,
-            'shifts' => $shifts,
             'csrf_token' => Session::generateToken(),
+            'active_conveyor_id' => $activeConveyorId,
+            'active_conveyor_name' => $activeConveyorName,
+            'active_shift' => $activeShift,
         ]);
     }
 
     /**
-     * PIC Store - Save new request
+     * Store - Save new request with multiple items
      */
     public function store(): void
     {
-        // Validate CSRF token
-        $csrfToken = $this->input('_csrf_token');
-        if (!Session::verifyToken($csrfToken)) {
-            Session::flash('error', 'Security token expired. Please try again.');
-            $this->redirect(url('/request_checksheet/create'));
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
         }
 
-        $checksheetId = $this->input('checksheet_id');
-        $conveyorId = $this->input('conveyor_id');
-        $shift = $this->input('shift');
-        $qty = $this->input('qty');
-        $notes = $this->input('notes', '');
+        // Get request body - could be JSON or form-encoded
+        $rawInput = file_get_contents('php://input');
+        $input = [];
+        
+        // Try to decode as JSON first
+        if (!empty($rawInput) && $rawInput[0] === '{') {
+            $input = json_decode($rawInput, true) ?: [];
+        } else {
+            // Fall back to $_POST
+            $input = $_POST;
+        }
+
+        $csrfToken = $input['_csrf_token'] ?? null;
+        if (!Session::verifyToken($csrfToken)) {
+            $this->redirect(url('request_checksheet/create'), 'error', 'Invalid request');
+        }
+
+        // Validate that conveyor and shift are setup
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('request_checksheet/create'), 'error', 'Conveyor dan Shift belum di-setup');
+        }
+
+        // Get items from form (array)
+        $items = $input['items'] ?? null;
 
         $errors = [];
 
-        // Validation
-        if (!$checksheetId) {
-            $errors['checksheet_id'] = 'Checksheet is required';
+        // Validate items array
+        if (!$items || !is_array($items) || empty($items)) {
+            $errors['items'] = 'Minimal harus ada 1 item';
         } else {
-            $checksheet = MasterChecksheet::findById((int)$checksheetId);
-            if (!$checksheet) {
-                $errors['checksheet_id'] = 'Selected checksheet not found';
+            // Validate each item
+            foreach ($items as $index => $item) {
+                if (empty($item['checksheet_id']) || !is_numeric($item['checksheet_id'])) {
+                    $errors["items.{$index}.checksheet_id"] = "Item " . ($index + 1) . ": Checksheet harus dipilih";
+                } else {
+                    $checksheet = MasterChecksheet::findById((int)$item['checksheet_id']);
+                    if (!$checksheet) {
+                        $errors["items.{$index}.checksheet_id"] = "Item " . ($index + 1) . ": Checksheet tidak valid";
+                    }
+                }
+
+                if (empty($item['qty']) || !is_numeric($item['qty'])) {
+                    $errors["items.{$index}.qty"] = "Item " . ($index + 1) . ": Quantity harus diisi";
+                } elseif ((int)$item['qty'] < 1 || (int)$item['qty'] > 9999) {
+                    $errors["items.{$index}.qty"] = "Item " . ($index + 1) . ": Quantity harus antara 1-9999";
+                }
             }
-        }
-
-        if (!$qty) {
-            $errors['qty'] = 'Quantity is required';
-        } elseif (!is_numeric($qty) || (int)$qty < 1) {
-            $errors['qty'] = 'Quantity must be a positive number';
-        }
-
-        // Validate conveyor (optional)
-        if ($conveyorId && !is_numeric($conveyorId)) {
-            $errors['conveyor_id'] = 'Invalid conveyor selected';
-        } elseif ($conveyorId) {
-            $conveyor = ConveyorModel::findById((int)$conveyorId);
-            if (!$conveyor) {
-                $errors['conveyor_id'] = 'Selected conveyor does not exist';
-            }
-        }
-
-        // Validate shift (optional)
-        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
-            $errors['shift'] = 'Invalid shift selected';
         }
 
         if (!empty($errors)) {
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'errors' => $errors
+                ]);
+                return;
+            }
+            
             $this->setTitle('Create Request Checksheet');
             $this->view('request_checksheet/create', [
                 'errors' => $errors,
-                'checksheet_id' => $checksheetId,
-                'conveyor_id' => $conveyorId,
-                'shift' => $shift,
-                'qty' => $qty,
-                'notes' => $notes,
-                'checksheets' => MasterChecksheet::getAll(),
-                'conveyors' => ConveyorModel::getActive(),
-                'shifts' => ['Shift A', 'Shift B'],
                 'csrf_token' => Session::generateToken(),
+                'active_conveyor_id' => Session::getActiveConveyorId(),
+                'active_conveyor_name' => Session::getActiveConveyorName(),
+                'active_shift' => Session::getActiveShift(),
+                'items' => $items,
             ]);
             return;
         }
 
-        // Generate request number and save
+        // Generate request number
         $requestNumber = RequestChecksheetModel::generateRequestNumber();
-        
-        try {
+
+        $conveyorId = Session::getActiveConveyorId();
+        $shift = Session::getActiveShift();
+        $allSuccess = true;
+        $insertErrors = [];
+
+        // Insert each item
+        foreach ($items as $index => $item) {
             $success = RequestChecksheetModel::create([
                 'request_number' => $requestNumber,
-                'checksheet_id' => (int)$checksheetId,
-                'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
-                'shift' => $shift ?: null,
-                'qty' => (int)$qty,
+                'checksheet_id' => (int)$item['checksheet_id'],
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
+                'qty' => (int)$item['qty'],
                 'status' => 'pending',
-                'requested_by' => session('user_id'),
-                'notes' => $notes ?: null,
+                'requested_by' => $userId,
+                'notes' => $item['notes'] ?? null,
             ]);
-        } catch (\Exception $e) {
-            error_log('RequestChecksheet::store() error: ' . $e->getMessage());
-            $this->redirect(url('/request_checksheet/create'), 'error', 'Database error: ' . $e->getMessage());
-            return;
+
+            if (!$success) {
+                $allSuccess = false;
+                $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
+                error_log("RequestChecksheet store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
+            }
         }
 
-        if ($success) {
-            $this->redirect(url('/request_checksheet'), 'success', 'Request created successfully');
+        if ($allSuccess) {
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Request dengan ' . count($items) . ' item berhasil dibuat',
+                    'redirect' => url('request_checksheet')
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('request_checksheet'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
         } else {
-            $this->redirect(url('/request_checksheet/create'), 'error', 'Failed to create request');
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Gagal membuat request: ' . implode(', ', $insertErrors),
+                    'details' => $insertErrors
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('request_checksheet/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
         }
     }
 

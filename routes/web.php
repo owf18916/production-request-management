@@ -17,6 +17,9 @@ $router->get('/logout', 'Auth@logout');
 $router->get('/dashboard', 'Dashboard@index', ['middleware' => 'Authenticate']);
 $router->get('/dashboard/admin', 'Dashboard@adminDashboard', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/dashboard/pic', 'Dashboard@picDashboard', ['middleware' => 'Authenticate']);
+$router->post('/dashboard/setup-conveyor-shift', 'Dashboard@setupConveyorShift', ['middleware' => 'Authenticate']);
+$router->post('/dashboard/clear-conveyor-shift', 'Dashboard@clearConveyorShift', ['middleware' => 'Authenticate']);
+$router->get('/dashboard/get-active-conveyor-shift', 'Dashboard@getActiveConveyorShift', ['middleware' => 'Authenticate']);
 $router->get('/admin/conveyors', 'Admin@conveyors', ['middleware' => ['Authenticate', 'Admin']]);
 
 // User Management routes - WITH admin middleware
@@ -113,3 +116,5 @@ $router->post('/admin/requests/memo/update-status/{id}', 'RequestMemo@updateStat
 $router->get('/api/requests', 'Api\Request@index', ['middleware' => 'Authenticate']);
 $router->post('/api/requests', 'Api\Request@store', ['middleware' => 'Authenticate']);
 $router->get('/api/atk/search', 'Api\Request@searchATK', ['middleware' => 'Authenticate']);
+$router->get('/api/checksheet/search', 'Api\Request@searchChecksheet', ['middleware' => 'Authenticate']);
+$router->get('/api/id-types/search', 'Api\Request@searchIDTypes', ['middleware' => 'Authenticate']);

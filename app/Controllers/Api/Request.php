@@ -5,6 +5,8 @@ namespace App\Controllers\Api;
 use App\Controller;
 use App\Session;
 use App\Models\MasterATK as MasterATKModel;
+use App\Models\MasterChecksheet;
+use App\Models\RequestID as RequestIDModel;
 
 /**
  * API Request Controller
@@ -85,5 +87,46 @@ class Request extends Controller
         echo json_encode(['results' => $results]);
         exit;
     }
+
+    /**
+     * Search Checksheet items (JSON)
+     */
+    public function searchChecksheet(): void
+    {
+        header('Content-Type: application/json');
+        
+        $query = $this->input('q', '');
+        
+        if (strlen($query) < 1) {
+            echo json_encode(['results' => []]);
+            exit;
+        }
+
+        $results = MasterChecksheet::search($query);
+        echo json_encode(['results' => $results]);
+        exit;
+    }
+
+    /**
+     * Search ID Types (JSON)
+     */
+    public function searchIDTypes(): void
+    {
+        header('Content-Type: application/json');
+        
+        $idTypes = RequestIDModel::VALID_ID_TYPES;
+        $results = [];
+        
+        foreach ($idTypes as $type) {
+            $results[] = [
+                'id' => $type,
+                'nama_id' => ucfirst(str_replace('_', ' ', $type))
+            ];
+        }
+        
+        echo json_encode(['results' => $results]);
+        exit;
+    }
 }
+
 

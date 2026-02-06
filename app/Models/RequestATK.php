@@ -89,6 +89,7 @@ class RequestATK extends Model
         }
 
         if (empty($columns)) {
+            error_log('RequestATK::create - No fillable columns matched');
             return false;
         }
 
@@ -96,9 +97,12 @@ class RequestATK extends Model
                 VALUES (" . implode(', ', $placeholders) . ")";
 
         try {
+            error_log('RequestATK::create - SQL: ' . $sql . ' | Values: ' . json_encode($values));
             Database::query($sql, $values);
+            error_log('RequestATK::create - Success for request_number: ' . ($data['request_number'] ?? 'unknown'));
             return true;
         } catch (\Exception $e) {
+            error_log('RequestATK::create - Exception: ' . $e->getMessage() . ' | Data: ' . json_encode($data));
             return false;
         }
     }

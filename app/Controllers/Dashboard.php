@@ -6,6 +6,7 @@ use App\Controller;
 use App\Session;
 use App\Security;
 use App\Models\Dashboard as DashboardModel;
+use App\Models\Conveyor as ConveyorModel;
 
 /**
  * Dashboard Controller
@@ -105,10 +106,14 @@ class Dashboard extends Controller
         // Get requests by type
         $requestsByType = DashboardModel::getRequestsByTypePIC($userId);
 
+        // Get active conveyors for setup
+        $conveyors = ConveyorModel::getActive();
+
         $this->with('stats', $stats)
              ->with('recentRequests', $recentRequests)
              ->with('statusDistribution', $statusDistribution)
-             ->with('requestsByType', $requestsByType);
+             ->with('requestsByType', $requestsByType)
+             ->with('conveyors', $conveyors);
 
         $this->view('dashboard/pic');
     }
@@ -132,6 +137,116 @@ class Dashboard extends Controller
                 'rejected' => DashboardModel::getTotalRejectedRequestsPIC($userId),
                 'completed' => DashboardModel::getTotalCompletedRequestsPIC($userId),
             ];
+        }
+    }
+
+    /**
+     * Setup Active Conveyor and Shift (AJAX)
+     */
+    public function setupConveyorShift(): void
+    {
+        $userId = Session::get('user_id');
+        $userRole = Session::get('user_role');
+        
+        if (!$userId) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        // Only PIC can setup conveyor/shift
+        if ($userRole === 'admin') {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Admin cannot setup conveyor/shift']);
+            return;
+        }
+
+        // Get JSON body
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        $conveyorId = $input['conveyor_id'] ?? null;
+        $conveyorName = $input['conveyor_name'] ?? null;
+        $shift = $input['shift'] ?? null;
+
+        if (!$conveyorId || !$conveyorName || !$shift) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+            return;
+        }
+
+        // Validate shift
+        if (!in_array($shift, ['Shift A', 'Shift B'])) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Invalid shift']);
+            return;
+        }
+
+        // Set session
+        Session::setActiveConveyor((int)$conveyorId, $conveyorName, $shift);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Conveyor and shift setup successfully',
+            'conveyor_name' => $conveyorName,
+            'shift' => $shift
+        ]);
+    }
+
+    /**
+     * Clear Active Conveyor and Shift (AJAX)
+     */
+    public function clearConveyorShift(): void
+    {
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        Session::clearActiveConveyorAndShift();
+
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Conveyor and shift cleared']);
+    }
+
+    /**
+     * Get Active Conveyor and Shift (AJAX)
+     */
+    public function getActiveConveyorShift(): void
+    {
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $hasActive = Session::hasActiveConveyorAndShift();
+        
+        header('Content-Type: application/json');
+        if ($hasActive) {
+            echo json_encode([
+                'success' => true,
+                'has_active' => true,
+                'conveyor_id' => Session::getActiveConveyorId(),
+                'conveyor_name' => Session::getActiveConveyorName(),
+                'shift' => Session::getActiveShift(),
+            ]);
+        } else {
+            echo json_encode([
+                'success' => true,
+                'has_active' => false,
+            ]);
         }
     }
 }

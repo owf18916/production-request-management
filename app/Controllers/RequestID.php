@@ -84,91 +84,102 @@ class RequestID extends Controller
      */
     public function create(): void
     {
-        $conveyors = ConveyorModel::getActive();
-        $shifts = ['Shift A', 'Shift B'];
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        // Check if user has setup conveyor and shift
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('dashboard'), 'error', 'Harap setup Conveyor dan Shift terlebih dahulu di Dashboard');
+        }
+
+        $activeConveyorId = Session::getActiveConveyorId();
+        $activeConveyorName = Session::getActiveConveyorName();
+        $activeShift = Session::getActiveShift();
         
         $this->setTitle('Request ID');
         $this->view('request_id/create', [
             'idTypes' => RequestIDModel::VALID_ID_TYPES,
             'idTypeFields' => self::ID_TYPE_FIELDS,
-            'conveyors' => $conveyors,
-            'shifts' => $shifts,
             'csrf_token' => Session::generateToken(),
+            'active_conveyor_id' => $activeConveyorId,
+            'active_conveyor_name' => $activeConveyorName,
+            'active_shift' => $activeShift,
         ]);
     }
 
     /**
-     * PIC Store - Save request with dynamic fields
+     * PIC Store - Save request with multiple ID items
      */
     public function store(): void
     {
-        if (!$this->validateCSRF()) {
-            Session::flash('error', 'Security token expired. Please try again.');
-            $this->redirect(url('/request-id/create'));
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
         }
 
-        $idType = $this->input('id_type');
-        $conveyorId = $this->input('conveyor_id');
-        $shift = $this->input('shift');
-        $userId = session('user_id');
+        // Get request body - could be JSON or form-encoded
+        $rawInput = file_get_contents('php://input');
+        $input = [];
+        
+        // Try to decode as JSON first
+        if (!empty($rawInput) && $rawInput[0] === '{') {
+            $input = json_decode($rawInput, true) ?: [];
+        } else {
+            // Fall back to $_POST
+            $input = $_POST;
+        }
+
+        $csrfToken = $input['_csrf_token'] ?? null;
+        if (!Session::verifyToken($csrfToken)) {
+            $this->redirect(url('request_id/create'), 'error', 'Invalid request');
+        }
+
+        // Validate that conveyor and shift are setup
+        if (!Session::hasActiveConveyorAndShift()) {
+            $this->redirect(url('request_id/create'), 'error', 'Conveyor dan Shift belum di-setup');
+        }
+
+        // Get items from form (array)
+        $items = $input['items'] ?? null;
 
         $errors = [];
 
-        // Validate ID type
-        if (!$idType || !in_array($idType, RequestIDModel::VALID_ID_TYPES)) {
-            $errors['id_type'] = 'Invalid ID type selected';
-        }
-
-        // Validate dynamic fields
-        if ($idType && isset(self::ID_TYPE_FIELDS[$idType])) {
-            $fields = self::ID_TYPE_FIELDS[$idType];
-            $details = [];
-
-            foreach ($fields as $fieldName => $fieldConfig) {
-                $fieldValue = $this->input($fieldName);
-
-                if ($fieldConfig['required'] && !$fieldValue) {
-                    $errors[$fieldName] = $fieldConfig['label'] . ' is required';
-                }
-
-                // Validate numeric fields
-                if ($fieldName === 'qty' || $fieldName === 'panjang' || $fieldName === 'lebar') {
-                    if ($fieldValue && !is_numeric($fieldValue)) {
-                        $errors[$fieldName] = $fieldConfig['label'] . ' must be numeric';
-                    }
-                }
-
-                if ($fieldValue) {
-                    $details[$fieldName] = $fieldValue;
+        // Validate items array
+        if (!$items || !is_array($items) || empty($items)) {
+            $errors['items'] = 'Minimal harus ada 1 item';
+        } else {
+            // Validate each item
+            foreach ($items as $index => $item) {
+                if (empty($item['id_type']) || !in_array($item['id_type'], RequestIDModel::VALID_ID_TYPES)) {
+                    $errors["items.{$index}.id_type"] = "Item " . ($index + 1) . ": ID Type harus valid";
                 }
             }
-        }
-
-        // Validate conveyor (optional)
-        if ($conveyorId && !is_numeric($conveyorId)) {
-            $errors['conveyor_id'] = 'Invalid conveyor selected';
-        } elseif ($conveyorId) {
-            $conveyor = ConveyorModel::findById((int)$conveyorId);
-            if (!$conveyor) {
-                $errors['conveyor_id'] = 'Selected conveyor does not exist';
-            }
-        }
-
-        // Validate shift (optional)
-        if ($shift && !in_array($shift, ['Shift A', 'Shift B'])) {
-            $errors['shift'] = 'Invalid shift selected';
         }
 
         if (!empty($errors)) {
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'errors' => $errors
+                ]);
+                return;
+            }
+            
             $this->setTitle('Request ID');
             $this->view('request_id/create', [
                 'errors' => $errors,
-                'idTypes' => RequestIDModel::VALID_ID_TYPES,
-                'idTypeFields' => self::ID_TYPE_FIELDS,
-                'formData' => ['id_type' => $idType, 'conveyor_id' => $conveyorId, 'shift' => $shift] + ($details ?? []),
-                'conveyors' => ConveyorModel::getActive(),
-                'shifts' => ['Shift A', 'Shift B'],
                 'csrf_token' => Session::generateToken(),
+                'active_conveyor_id' => Session::getActiveConveyorId(),
+                'active_conveyor_name' => Session::getActiveConveyorName(),
+                'active_shift' => Session::getActiveShift(),
+                'items' => $items,
             ]);
             return;
         }
@@ -176,36 +187,57 @@ class RequestID extends Controller
         // Generate request number
         $requestNumber = RequestIDModel::generateRequestNumber();
 
-        // Create request
-        $success = RequestIDModel::create([
-            'request_number' => $requestNumber,
-            'id_type' => $idType,
-            'conveyor_id' => $conveyorId ? (int)$conveyorId : null,
-            'shift' => $shift ?: null,
-            'status' => 'pending',
-            'requested_by' => $userId,
-            'notes' => $this->input('notes'),
-        ]);
+        $conveyorId = Session::getActiveConveyorId();
+        $shift = Session::getActiveShift();
+        $allSuccess = true;
+        $insertErrors = [];
 
-        if ($success) {
-            // Get the inserted ID
-            $sql = "SELECT id FROM request_id WHERE request_number = ?";
-            $result = \App\Database::row($sql, [$requestNumber]);
-            $requestId = $result->id;
+        // Insert each item
+        foreach ($items as $index => $item) {
+            $success = RequestIDModel::create([
+                'request_number' => $requestNumber,
+                'id_type' => $item['id_type'],
+                'conveyor_id' => $conveyorId,
+                'shift' => $shift,
+                'status' => 'pending',
+                'requested_by' => $userId,
+                'notes' => $item['notes'] ?? null,
+            ]);
 
-            // Save details
-            RequestIDModel::saveDetails($requestId, $details);
+            if (!$success) {
+                $allSuccess = false;
+                $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
+                error_log("RequestID store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
+            }
+        }
 
-            // Record initial history
-            $historyQuery = "INSERT INTO request_id_history (request_id_id, status, changed_by, notes, created_at)
-                            VALUES (?, ?, ?, ?, NOW())";
-            \App\Database::query($historyQuery, [$requestId, 'pending', $userId, 'Request created']);
-
-            Session::flash('success', 'ID Request created successfully. Request Number: ' . $requestNumber);
-            $this->redirect(url('/request-id'));
+        if ($allSuccess) {
+            // Check if AJAX request (JSON)
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(200);
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Request dengan ' . count($items) . ' item berhasil dibuat',
+                    'redirect' => url('request_id')
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('request_id'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
         } else {
-            Session::flash('error', 'Failed to create ID request');
-            $this->redirect(url('/request-id/create'));
+            if (!empty($rawInput) && $rawInput[0] === '{') {
+                header('Content-Type: application/json');
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Gagal membuat request: ' . implode(', ', $insertErrors),
+                    'details' => $insertErrors
+                ]);
+                return;
+            }
+            
+            $this->redirect(url('request_id/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
         }
     }
 

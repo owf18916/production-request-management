@@ -85,13 +85,21 @@ class RequestChecksheet extends Model
             }
         }
 
+        if (empty($columns)) {
+            error_log('RequestChecksheet::create - No fillable columns matched');
+            return false;
+        }
+
         $sql = "INSERT INTO request_checksheet (" . implode(', ', $columns) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
 
         try {
+            error_log('RequestChecksheet::create - SQL: ' . $sql . ' | Values: ' . json_encode($values));
             Database::query($sql, $values);
+            error_log('RequestChecksheet::create - Success for request_number: ' . ($data['request_number'] ?? 'unknown'));
             return true;
         } catch (\Exception $e) {
+            error_log('RequestChecksheet::create - Exception: ' . $e->getMessage() . ' | Data: ' . json_encode($data));
             return false;
         }
     }

@@ -95,6 +95,7 @@ class RequestID extends Model
         }
 
         if (empty($columns)) {
+            error_log('RequestID::create - No fillable columns matched');
             return false;
         }
 
@@ -102,9 +103,12 @@ class RequestID extends Model
                 VALUES (" . implode(', ', $placeholders) . ")";
 
         try {
+            error_log('RequestID::create - SQL: ' . $sql . ' | Values: ' . json_encode($values));
             Database::query($sql, $values);
+            error_log('RequestID::create - Success for request_number: ' . ($data['request_number'] ?? 'unknown'));
             return true;
         } catch (\Exception $e) {
+            error_log('RequestID::create - Exception: ' . $e->getMessage() . ' | Data: ' . json_encode($data));
             return false;
         }
     }
