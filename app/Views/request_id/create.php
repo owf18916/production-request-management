@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <form method="POST" id="request-form" action="<?php echo url('request_id/store'); ?>">
+            <form method="POST" id="request-form" action="<?php echo url('request-id/store'); ?>">
                 <input type="hidden" name="_csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
 
                 <!-- Items Container -->
@@ -56,7 +56,7 @@
                         Submit Request
                     </button>
                     <a 
-                        href="<?php echo url('request_id'); ?>"
+                        href="<?php echo url('request-id'); ?>"
                         class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg text-center"
                     >
                         Cancel
@@ -331,7 +331,7 @@ function submitForm(event) {
             if (resp.success) {
                 showToast('Request berhasil dibuat!', 'success');
                 setTimeout(() => {
-                    window.location.href = '<?php echo url('request_id'); ?>';
+                    window.location.href = '<?php echo url('request-id'); ?>';
                 }, 1500);
             } else {
                 // Show error with details if available

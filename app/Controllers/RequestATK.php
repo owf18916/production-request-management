@@ -183,9 +183,6 @@ class RequestATK extends Controller
             return;
         }
 
-        // Generate request number
-        $requestNumber = RequestATKModel::generateRequestNumber();
-
         $conveyorId = Session::getActiveConveyorId();
         $shift = Session::getActiveShift();
         $allSuccess = true;
@@ -193,6 +190,9 @@ class RequestATK extends Controller
 
         // Insert each item
         foreach ($items as $index => $item) {
+            // Generate request number untuk setiap item
+            $requestNumber = RequestATKModel::generateRequestNumber();
+            
             $success = RequestATKModel::create([
                 'request_number' => $requestNumber,
                 'atk_id' => (int)$item['atk_id'],

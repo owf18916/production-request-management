@@ -135,12 +135,12 @@ class RequestID extends Controller
 
         $csrfToken = $input['_csrf_token'] ?? null;
         if (!Session::verifyToken($csrfToken)) {
-            $this->redirect(url('request_id/create'), 'error', 'Invalid request');
+            $this->redirect(url('request-id/create'), 'error', 'Invalid request');
         }
 
         // Validate that conveyor and shift are setup
         if (!Session::hasActiveConveyorAndShift()) {
-            $this->redirect(url('request_id/create'), 'error', 'Conveyor dan Shift belum di-setup');
+            $this->redirect(url('request-id/create'), 'error', 'Conveyor dan Shift belum di-setup');
         }
 
         // Get items from form (array)
@@ -184,9 +184,6 @@ class RequestID extends Controller
             return;
         }
 
-        // Generate request number
-        $requestNumber = RequestIDModel::generateRequestNumber();
-
         $conveyorId = Session::getActiveConveyorId();
         $shift = Session::getActiveShift();
         $allSuccess = true;
@@ -194,6 +191,9 @@ class RequestID extends Controller
 
         // Insert each item
         foreach ($items as $index => $item) {
+            // Generate request number untuk setiap item
+            $requestNumber = RequestIDModel::generateRequestNumber();
+            
             $success = RequestIDModel::create([
                 'request_number' => $requestNumber,
                 'id_type' => $item['id_type'],
@@ -219,12 +219,12 @@ class RequestID extends Controller
                 echo json_encode([
                     'success' => true,
                     'message' => 'Request dengan ' . count($items) . ' item berhasil dibuat',
-                    'redirect' => url('request_id')
+                    'redirect' => url('request-id')
                 ]);
                 return;
             }
             
-            $this->redirect(url('request_id'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
+            $this->redirect(url('request-id'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
         } else {
             if (!empty($rawInput) && $rawInput[0] === '{') {
                 header('Content-Type: application/json');
@@ -237,7 +237,7 @@ class RequestID extends Controller
                 return;
             }
             
-            $this->redirect(url('request_id/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
+            $this->redirect(url('request-id/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
         }
     }
 

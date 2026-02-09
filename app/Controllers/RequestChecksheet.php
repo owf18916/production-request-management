@@ -162,9 +162,6 @@ class RequestChecksheet extends Controller
             return;
         }
 
-        // Generate request number
-        $requestNumber = RequestChecksheetModel::generateRequestNumber();
-
         $conveyorId = Session::getActiveConveyorId();
         $shift = Session::getActiveShift();
         $allSuccess = true;
@@ -172,6 +169,9 @@ class RequestChecksheet extends Controller
 
         // Insert each item
         foreach ($items as $index => $item) {
+            // Generate request number untuk setiap item
+            $requestNumber = RequestChecksheetModel::generateRequestNumber();
+            
             $success = RequestChecksheetModel::create([
                 'request_number' => $requestNumber,
                 'checksheet_id' => (int)$item['checksheet_id'],

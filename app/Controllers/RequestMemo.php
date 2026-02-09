@@ -97,12 +97,12 @@ class RequestMemo extends Controller
 
         $csrfToken = $input['_csrf_token'] ?? null;
         if (!Session::verifyToken($csrfToken)) {
-            $this->redirect(url('request_memo/create'), 'error', 'Invalid request');
+            $this->redirect(url('requests/memo/create'), 'error', 'Invalid request');
         }
 
         // Validate that conveyor and shift are setup
         if (!Session::hasActiveConveyorAndShift()) {
-            $this->redirect(url('request_memo/create'), 'error', 'Conveyor dan Shift belum di-setup');
+            $this->redirect(url('requests/memo/create'), 'error', 'Conveyor dan Shift belum di-setup');
         }
 
         // Get items from form (array)
@@ -150,9 +150,6 @@ class RequestMemo extends Controller
             return;
         }
 
-        // Generate request number
-        $requestNumber = RequestMemoModel::generateRequestNumber();
-
         $conveyorId = Session::getActiveConveyorId();
         $shift = Session::getActiveShift();
         $allSuccess = true;
@@ -160,6 +157,9 @@ class RequestMemo extends Controller
 
         // Insert each item
         foreach ($items as $index => $item) {
+            // Generate request number untuk setiap item
+            $requestNumber = RequestMemoModel::generateRequestNumber();
+            
             $success = RequestMemoModel::create([
                 'request_number' => $requestNumber,
                 'conveyor_id' => $conveyorId,
@@ -184,12 +184,12 @@ class RequestMemo extends Controller
                 echo json_encode([
                     'success' => true,
                     'message' => 'Request dengan ' . count($items) . ' item berhasil dibuat',
-                    'redirect' => url('request_memo')
+                    'redirect' => url('requests/memo')
                 ]);
                 return;
             }
             
-            $this->redirect(url('request_memo'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
+            $this->redirect(url('requests/memo'), 'success', 'Request dengan ' . count($items) . ' item berhasil dibuat');
         } else {
             if (!empty($rawInput) && $rawInput[0] === '{') {
                 header('Content-Type: application/json');
@@ -202,7 +202,7 @@ class RequestMemo extends Controller
                 return;
             }
             
-            $this->redirect(url('request_memo/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
+            $this->redirect(url('requests/memo/create'), 'error', 'Gagal membuat request: ' . implode(', ', $insertErrors));
         }
     }
 
