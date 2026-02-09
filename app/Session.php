@@ -97,6 +97,15 @@ class Session
     }
 
     /**
+     * Peek flashed data (read without consuming)
+     */
+    public static function peekFlash(string $key, $default = null)
+    {
+        self::start();
+        return $_SESSION['_flash'][$key] ?? $default;
+    }
+
+    /**
      * Destroy session
      */
     public static function destroy(): void

@@ -196,6 +196,12 @@ function session(string $key = null, $default = null)
         return \App\Session::all();
     }
 
+    // Check flash messages first (without consuming)
+    $value = \App\Session::peekFlash($key, null);
+    if ($value !== null) {
+        return $value;
+    }
+
     return \App\Session::get($key, $default);
 }
 }
