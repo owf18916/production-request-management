@@ -38,29 +38,44 @@
 
         <!-- Filter Section -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <form method="GET" action="<?php echo url('/request-id'); ?>" class="flex gap-4 flex-wrap">
-                <input type="text" name="search" placeholder="Search request number..." value="<?php echo htmlspecialchars($search); ?>" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                
-                <select name="id_type" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All ID Types</option>
-                    <option value="id_punggung" <?php echo $idTypeFilter === 'id_punggung' ? 'selected' : ''; ?>>ID Punggung</option>
-                    <option value="pin_4m" <?php echo $idTypeFilter === 'pin_4m' ? 'selected' : ''; ?>>PIN 4M</option>
-                    <option value="id_kaki" <?php echo $idTypeFilter === 'id_kaki' ? 'selected' : ''; ?>>ID Kaki</option>
-                    <option value="job_psd" <?php echo $idTypeFilter === 'job_psd' ? 'selected' : ''; ?>>Job PSD</option>
-                    <option value="id_other" <?php echo $idTypeFilter === 'id_other' ? 'selected' : ''; ?>>ID Other</option>
-                </select>
+            <form method="GET" action="<?php echo url('/request-id'); ?>" class="space-y-4">
+                <div class="flex gap-4 flex-wrap">
+                    <input type="text" name="search" placeholder="Search request number..." value="<?php echo htmlspecialchars($search); ?>" class="flex-1 min-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <select name="id_type" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All ID Types</option>
+                        <option value="id_punggung" <?php echo $idTypeFilter === 'id_punggung' ? 'selected' : ''; ?>>ID Punggung</option>
+                        <option value="pin_4m" <?php echo $idTypeFilter === 'pin_4m' ? 'selected' : ''; ?>>PIN 4M</option>
+                        <option value="id_kaki" <?php echo $idTypeFilter === 'id_kaki' ? 'selected' : ''; ?>>ID Kaki</option>
+                        <option value="job_psd" <?php echo $idTypeFilter === 'job_psd' ? 'selected' : ''; ?>>Job PSD</option>
+                        <option value="id_other" <?php echo $idTypeFilter === 'id_other' ? 'selected' : ''; ?>>ID Other</option>
+                    </select>
 
-                <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Status</option>
-                    <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="approved" <?php echo $statusFilter === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                    <option value="rejected" <?php echo $statusFilter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
-                    <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                </select>
+                    <select name="status" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Status</option>
+                        <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                        <option value="approved" <?php echo $statusFilter === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                        <option value="rejected" <?php echo $statusFilter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                        <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    </select>
+                </div>
 
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Filter
-                </button>
+                <div class="flex gap-4 flex-wrap items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                        <input type="date" name="start_date" value="<?php echo htmlspecialchars($startDate ?? ''); ?>" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                        <input type="date" name="end_date" value="<?php echo htmlspecialchars($endDate ?? ''); ?>" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Filter
+                    </button>
+                    <a href="<?php echo url('request-id'); ?>" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">
+                        Reset
+                    </a>
+                </div>
             </form>
         </div>
 

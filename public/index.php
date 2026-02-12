@@ -32,8 +32,39 @@ if (env('APP_DEBUG', false)) {
     ini_set('display_errors', '0');
 }
 
-// Set charset
-header('Content-Type: text/html; charset=' . env('APP_CHARSET', 'UTF-8'));
+// Define base paths for URL handling
+$basePaths = [
+    '/production-request-management/public',
+    '/production-request-management',
+];
+
+// Set charset (hanya untuk HTML, bukan untuk export/download)
+$path_for_check = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$is_export = false;
+
+// Extract path without base paths
+foreach ($basePaths as $basePath) {
+    $basePath_trimmed = rtrim($basePath, '/');
+    if (strpos($path_for_check, $basePath_trimmed) === 0) {
+        $path_for_check = substr($path_for_check, strlen($basePath_trimmed));
+        break;
+    }
+}
+$path_for_check = '/' . ltrim($path_for_check, '/');
+
+// Check if this is an export route (before query string)
+$path_before_query = explode('?', $path_for_check)[0];
+$exportRoutes = ['/admin/requests/atk/export', '/admin/request-id/export', '/admin/request_checksheet/export', '/requests/atk/export', '/request-id/export', '/request_checksheet/export'];
+foreach ($exportRoutes as $route) {
+    if ($path_before_query === $route) {
+        $is_export = true;
+        break;
+    }
+}
+
+if (!$is_export) {
+    header('Content-Type: text/html; charset=' . env('APP_CHARSET', 'UTF-8'));
+}
 
 // Start session
 \App\Session::start();
@@ -52,11 +83,6 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Remove the base path prefix to get the route
 // Handle both /production-request-management/path and /production-request-management/public/path
-$basePaths = [
-    '/production-request-management/public',
-    '/production-request-management',
-];
-
 foreach ($basePaths as $basePath) {
     if (strpos($path, $basePath) === 0) {
         $path = substr($path, strlen($basePath));

@@ -20,6 +20,8 @@ class RequestChecksheet extends Controller
         $userId = session('user_id');
         $search = $this->input('search');
         $status = $this->input('status');
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
         
         $requests = RequestChecksheetModel::getByUser($userId);
 
@@ -39,11 +41,21 @@ class RequestChecksheet extends Controller
             });
         }
 
+        // Filter by date range if provided
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
+
         $this->setTitle('My Requests - Checksheet');
         $this->view('request_checksheet/index', [
             'requests' => array_values($requests),
             'search' => $search,
             'status' => $status,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
         ]);
     }
@@ -247,6 +259,51 @@ class RequestChecksheet extends Controller
     }
 
     /**
+     * PIC Cancel - Cancel own pending request
+     */
+    public function cancel(int $id): void
+    {
+        $userId = session('user_id');
+        $request = RequestChecksheetModel::findById($id);
+
+        if (!$request) {
+            $this->redirect('/request_checksheet', 'error', 'Request not found');
+        }
+
+        // Check authorization - PIC can only cancel own requests
+        if ($request->requested_by != $userId) {
+            $this->redirect('/request_checksheet', 'error', 'Unauthorized access');
+        }
+
+        // Check if request can be cancelled (not approved)
+        if ($request->status === 'approved') {
+            $this->redirect(url("request_checksheet/show/{$id}"), 'error', 'Cannot cancel an approved request');
+        }
+
+        if ($request->status === 'completed') {
+            $this->redirect(url("request_checksheet/show/{$id}"), 'error', 'Cannot cancel a completed request');
+        }
+
+        if ($request->status === 'cancelled') {
+            $this->redirect(url("request_checksheet/show/{$id}"), 'error', 'Request is already cancelled');
+        }
+
+        // Update status to cancelled with cancellation note
+        $success = RequestChecksheetModel::updateStatus(
+            $id,
+            'cancelled',
+            $userId,
+            'Cancelled by requester'
+        );
+
+        if ($success) {
+            $this->redirect(url("request_checksheet/show/{$id}"), 'success', 'Request cancelled successfully');
+        } else {
+            $this->redirect(url("request_checksheet/show/{$id}"), 'error', 'Failed to cancel request');
+        }
+    }
+
+    /**
      * Admin Index - List all requests
      */
     public function adminIndex(): void
@@ -409,5 +466,75 @@ class RequestChecksheet extends Controller
     {
         $this->data['title'] = $title;
         return $this;
+    }
+
+    /**
+     * Export - Export requests to Excel
+     */
+    public function export(): void
+    {
+        $userId = session('user_id');
+        $userRole = Session::get('user_role');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        // Validate date range
+        if (!$startDate || !$endDate) {
+            Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
+            $this->redirect(url('admin/request_checksheet'));
+            return;
+        }
+
+        $validation = validateDateRange($startDate, $endDate);
+        if ($validation !== true) {
+            Session::flash('error', $validation);
+            $this->redirect(url('admin/request_checksheet'));
+            return;
+        }
+
+        // Get requests based on role
+        if ($userRole === 'admin') {
+            $requests = RequestChecksheetModel::getAll();
+        } else {
+            $requests = RequestChecksheetModel::getByUser($userId);
+        }
+
+        // Apply date range filter
+        $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+            $createdDate = date('Y-m-d', strtotime($request->created_at));
+            return $createdDate >= $startDate && $createdDate <= $endDate;
+        });
+
+        // Prepare data for export
+        $headers = ['Request Number', 'Checksheet', 'Qty', 'Status', 'Requester', 'Created Date'];
+        $data = [];
+
+        foreach ($requests as $request) {
+            // Get checksheet name
+            $checksheet = MasterChecksheet::findById($request->checksheet_id);
+            $checksheetName = $checksheet ? $checksheet->judul_checksheet : 'N/A';
+
+            // Get requester name
+            $requester = User::getUserById($request->requested_by);
+            $requesterName = $requester ? $requester->full_name : 'N/A';
+
+            $data[] = [
+                $request->request_number,
+                $checksheetName,
+                $request->qty,
+                ucfirst($request->status),
+                $requesterName,
+                date('Y-m-d H:i:s', strtotime($request->created_at)),
+            ];
+        }
+
+        // Export to Excel
+        $filename = 'Request_Checksheet_' . date('Y-m-d_His');
+        exportExcel($filename, $headers, $data);
     }
 }

@@ -233,6 +233,51 @@ class RequestMemo extends Controller
     }
 
     /**
+     * Cancel - Cancel own pending request
+     */
+    public function cancel(int $id): void
+    {
+        $userId = session('user_id');
+        $memo = RequestMemoModel::findById($id);
+
+        if (!$memo) {
+            $this->redirect(url('/requests/memo'), 'error', 'Request not found');
+        }
+
+        // Check authorization - PIC can only cancel own requests
+        if ($memo->requested_by !== $userId) {
+            $this->redirect(url('/requests/memo'), 'error', 'Unauthorized access');
+        }
+
+        // Check if request can be cancelled (only pending can be cancelled)
+        if ($memo->status === 'approved') {
+            $this->redirect(url("requests/memo/show/{$id}"), 'error', 'Cannot cancel an approved request');
+        }
+
+        if ($memo->status === 'completed') {
+            $this->redirect(url("requests/memo/show/{$id}"), 'error', 'Cannot cancel a completed request');
+        }
+
+        if ($memo->status === 'cancelled') {
+            $this->redirect(url("requests/memo/show/{$id}"), 'error', 'Request is already cancelled');
+        }
+
+        // Update status to cancelled with cancellation note
+        $success = RequestMemoModel::updateStatus(
+            $id,
+            'cancelled',
+            $userId,
+            'Cancelled by requester'
+        );
+
+        if ($success) {
+            $this->redirect(url("requests/memo/show/{$id}"), 'success', 'Request cancelled successfully');
+        } else {
+            $this->redirect(url("requests/memo/show/{$id}"), 'error', 'Failed to cancel request');
+        }
+    }
+
+    /**
      * Admin: Index - List all requests with filters
      */
     public function adminIndex(): void

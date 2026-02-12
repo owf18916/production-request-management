@@ -361,3 +361,72 @@ function asset(string $path = ''): string
 }
 }
 
+/**
+ * Export data to Excel (CSV format compatible with Excel)
+ * 
+ * @param string $filename The filename for the export (without extension)
+ * @param array $headers Column headers
+ * @param array $data Array of arrays containing row data
+ * @return void
+ */
+if (!function_exists('exportExcel')) {
+function exportExcel(string $filename, array $headers, array $data): void
+{
+    // Set headers for CSV download (Excel compatible)
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    // Create output stream
+    $output = fopen('php://output', 'w');
+
+    // Write BOM for UTF-8 (allows Excel to recognize UTF-8 properly)
+    fputs($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+    // Write headers
+    fputcsv($output, $headers, ',', '"');
+
+    // Write data
+    foreach ($data as $row) {
+        fputcsv($output, $row, ',', '"');
+    }
+
+    fclose($output);
+    exit;
+}
+}
+
+/**
+ * Validate date range (max 31 days difference)
+ * 
+ * @param string $startDate Start date (Y-m-d format)
+ * @param string $endDate End date (Y-m-d format)
+ * @return bool|string True if valid, error message if invalid
+ */
+if (!function_exists('validateDateRange')) {
+function validateDateRange(string $startDate, string $endDate)
+{
+    try {
+        $start = new DateTime($startDate);
+        $end = new DateTime($endDate);
+
+        if ($start > $end) {
+            return 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir';
+        }
+
+        $interval = $start->diff($end);
+        $days = $interval->days;
+
+        if ($days > 31) {
+            return 'Range tanggal maksimal 31 hari, Anda memilih ' . $days . ' hari';
+        }
+
+        return true;
+    } catch (Exception $e) {
+        return 'Format tanggal tidak valid';
+    }
+}
+}
+

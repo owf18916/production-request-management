@@ -1,5 +1,8 @@
 <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
+        <!-- Include Confirmation Modal -->
+        <?php include __DIR__ . '/../layouts/confirmation_modal.php'; ?>
+
         <!-- Header -->
         <div class="mb-8 flex justify-between items-center">
             <div>
@@ -46,13 +49,15 @@
                                         'pending' => 'bg-yellow-100 text-yellow-800',
                                         'approved' => 'bg-green-100 text-green-800',
                                         'rejected' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-blue-100 text-blue-800'
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800'
                                     ];
                                     $statusLabels = [
                                         'pending' => 'Pending',
                                         'approved' => 'Approved',
                                         'rejected' => 'Rejected',
-                                        'completed' => 'Completed'
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled'
                                     ];
                                 ?>
                                 <span class="px-3 py-1 rounded-full text-sm font-medium <?php echo $statusColors[$request->status]; ?>">
@@ -161,6 +166,41 @@
                         <p class="text-sm text-gray-600">No history available</p>
                     <?php endif; ?>
                 </div>
+
+                <!-- Cancel Request Button -->
+                <?php if ($request->status === 'pending'): ?>
+                    <div class="bg-white rounded-lg shadow p-6 mt-6">
+                        <button 
+                            type="button"
+                            onclick="openCancelConfirmation()"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                        >
+                            Cancel Request
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2">This will cancel your request</p>
+                    </div>
+
+                    <script>
+                    function openCancelConfirmation() {
+                        openConfirmationModal(
+                            'Cancel Request',
+                            'Are you sure you want to cancel this request? This action cannot be undone.',
+                            submitCancelForm,
+                            'Yes, Cancel Request',
+                            'red'
+                        );
+                    }
+
+                    function submitCancelForm() {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '<?php echo url("request-id/cancel/{$request->id}"); ?>';
+                        form.innerHTML = '<input type="hidden" name="_csrf_token" value="<?php echo session('_csrf_token') ?? ''; ?>">';
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                    </script>
+                <?php endif; ?>
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ use App\Session;
 use App\Security;
 use App\Models\RequestID as RequestIDModel;
 use App\Models\Conveyor as ConveyorModel;
+use App\Models\User as UserModel;
 
 class RequestID extends Controller
 {
@@ -52,6 +53,8 @@ class RequestID extends Controller
         $search = $this->input('search', '');
         $idTypeFilter = $this->input('id_type', '');
         $statusFilter = $this->input('status', '');
+        $startDate = $this->input('start_date', '');
+        $endDate = $this->input('end_date', '');
 
         $requests = RequestIDModel::getByUser($userId);
 
@@ -68,6 +71,12 @@ class RequestID extends Controller
                 stripos($r->id_type, $search) !== false
             );
         }
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
 
         $this->setTitle('My ID Requests');
         $this->view('request_id/index', [
@@ -75,6 +84,8 @@ class RequestID extends Controller
             'search' => $search,
             'idTypeFilter' => $idTypeFilter,
             'statusFilter' => $statusFilter,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
         ]);
     }
@@ -278,6 +289,51 @@ class RequestID extends Controller
     }
 
     /**
+     * Cancel - Cancel own pending request
+     */
+    public function cancel(int $id): void
+    {
+        $userId = session('user_id');
+        $request = RequestIDModel::findById($id);
+
+        if (!$request) {
+            $this->redirect(url('/request-id'), 'error', 'Request not found');
+        }
+
+        // Check authorization - PIC can only cancel own requests
+        if ($request->requested_by !== $userId) {
+            $this->redirect(url('/request-id'), 'error', 'Unauthorized access');
+        }
+
+        // Check if request can be cancelled (only pending can be cancelled)
+        if ($request->status === 'approved') {
+            $this->redirect(url("request-id/{$id}"), 'error', 'Cannot cancel an approved request');
+        }
+
+        if ($request->status === 'completed') {
+            $this->redirect(url("request-id/{$id}"), 'error', 'Cannot cancel a completed request');
+        }
+
+        if ($request->status === 'cancelled') {
+            $this->redirect(url("request-id/{$id}"), 'error', 'Request is already cancelled');
+        }
+
+        // Update status to cancelled with cancellation note
+        $success = RequestIDModel::updateStatus(
+            $id,
+            'cancelled',
+            $userId,
+            'Cancelled by requester'
+        );
+
+        if ($success) {
+            $this->redirect(url("request-id/{$id}"), 'success', 'Request cancelled successfully');
+        } else {
+            $this->redirect(url("request-id/{$id}"), 'error', 'Failed to cancel request');
+        }
+    }
+
+    /**
      * Admin Index - List all requests
      */
     public function adminIndex(): void
@@ -397,5 +453,80 @@ class RequestID extends Controller
     {
         $this->data['title'] = $title;
         return $this;
+    }
+
+    /**
+     * Export - Export requests to Excel
+     */
+    public function export(): void
+    {
+        $userId = session('user_id');
+        $userRole = Session::get('user_role');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        // Validate date range
+        if (!$startDate || !$endDate) {
+            Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
+            $this->redirect(url('admin/request-id'));
+            return;
+        }
+
+        $validation = validateDateRange($startDate, $endDate);
+        if ($validation !== true) {
+            Session::flash('error', $validation);
+            $this->redirect(url('admin/request-id'));
+            return;
+        }
+
+        // Get requests based on role
+        if ($userRole === 'admin') {
+            $requests = RequestIDModel::getAll();
+        } else {
+            $requests = RequestIDModel::getByUser($userId);
+        }
+
+        // Apply date range filter
+        $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+            $createdDate = date('Y-m-d', strtotime($request->created_at));
+            return $createdDate >= $startDate && $createdDate <= $endDate;
+        });
+
+        // Prepare data for export
+        $headers = ['Request Number', 'ID Type', 'Status', 'Requester', 'Created Date'];
+        $data = [];
+
+        $typeLabels = [
+            'id_punggung' => 'ID Punggung',
+            'pin_4m' => 'PIN 4M',
+            'id_kaki' => 'ID Kaki',
+            'job_psd' => 'Job PSD',
+            'id_other' => 'ID Other'
+        ];
+
+        foreach ($requests as $request) {
+            // Get requester name
+            $requester = UserModel::getUserById($request->requested_by);
+            $requesterName = $requester ? $requester->full_name : 'N/A';
+
+            $idTypeLabel = $typeLabels[$request->id_type] ?? $request->id_type;
+
+            $data[] = [
+                $request->request_number,
+                $idTypeLabel,
+                ucfirst($request->status),
+                $requesterName,
+                date('Y-m-d H:i:s', strtotime($request->created_at)),
+            ];
+        }
+
+        // Export to Excel
+        $filename = 'Request_ID_' . date('Y-m-d_His');
+        exportExcel($filename, $headers, $data);
     }
 }

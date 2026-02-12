@@ -1,5 +1,8 @@
 <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
+        <!-- Include Confirmation Modal -->
+        <?php include __DIR__ . '/../layouts/confirmation_modal.php'; ?>
+
         <!-- Back Link -->
         <a href="<?php echo url('/requests/memo'); ?>" class="text-blue-600 hover:text-blue-900 font-medium flex items-center mb-6">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +26,8 @@
                             bg-green-100 text-green-800
                         <?php elseif ($memo->status === 'rejected'): ?>
                             bg-red-100 text-red-800
+                        <?php elseif ($memo->status === 'cancelled'): ?>
+                            bg-gray-100 text-gray-800
                         <?php else: ?>
                             bg-blue-100 text-blue-800
                         <?php endif; ?>
@@ -111,5 +116,40 @@
                 <p class="text-gray-600 text-center py-8">No history records found</p>
             <?php endif; ?>
         </div>
+
+        <!-- Cancel Request Button -->
+        <?php if ($memo->status === 'pending'): ?>
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <button 
+                    type="button"
+                    onclick="openCancelConfirmation()"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                >
+                    Cancel Request
+                </button>
+                <p class="text-xs text-gray-500 mt-2">This will cancel your request</p>
+            </div>
+
+            <script>
+            function openCancelConfirmation() {
+                openConfirmationModal(
+                    'Cancel Request',
+                    'Are you sure you want to cancel this request? This action cannot be undone.',
+                    submitCancelForm,
+                    'Yes, Cancel Request',
+                    'red'
+                );
+            }
+
+            function submitCancelForm() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?php echo url("requests/memo/cancel/{$memo->id}"); ?>';
+                form.innerHTML = '<input type="hidden" name="_csrf_token" value="<?php echo session('_csrf_token') ?? ''; ?>">';
+                document.body.appendChild(form);
+                form.submit();
+            }
+            </script>
+        <?php endif; ?>
     </div>
 </div>

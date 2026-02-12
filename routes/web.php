@@ -72,32 +72,41 @@ $router->get('/requests/atk', 'RequestATK@index', ['middleware' => 'Authenticate
 $router->get('/requests/atk/create', 'RequestATK@create', ['middleware' => 'Authenticate']);
 $router->post('/requests/atk/store', 'RequestATK@store', ['middleware' => 'Authenticate']);
 $router->get('/requests/atk/show/{id}', 'RequestATK@show', ['middleware' => 'Authenticate']);
+$router->post('/requests/atk/cancel/{id}', 'RequestATK@cancel', ['middleware' => 'Authenticate']);
+$router->get('/requests/atk/export', 'RequestATK@export', ['middleware' => 'Authenticate']);
 
 // Request ATK routes (Admin) - WITH admin middleware
 $router->get('/admin/requests/atk', 'RequestATK@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/requests/atk/{id}', 'RequestATK@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/requests/atk/{id}/update-status', 'RequestATK@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/requests/atk/export', 'RequestATK@export', ['middleware' => ['Authenticate', 'Admin']]);
 
 // Request ID routes (PIC) - WITH authentication middleware - MUST BE BEFORE /request-id/{id}
 $router->get('/request-id', 'RequestID@index', ['middleware' => 'Authenticate']);
 $router->get('/request-id/create', 'RequestID@create', ['middleware' => 'Authenticate']);
 $router->post('/request-id/store', 'RequestID@store', ['middleware' => 'Authenticate']);
+$router->get('/request-id/export', 'RequestID@export', ['middleware' => 'Authenticate']);
 $router->get('/request-id/{id}', 'RequestID@show', ['middleware' => 'Authenticate']);
+$router->post('/request-id/cancel/{id}', 'RequestID@cancel', ['middleware' => 'Authenticate']);
 
 // Request Checksheet routes (PIC) - WITH authentication middleware - MUST BE BEFORE /request_checksheet/{id}
 $router->get('/request_checksheet', 'RequestChecksheet@index', ['middleware' => 'Authenticate']);
 $router->get('/request_checksheet/create', 'RequestChecksheet@create', ['middleware' => 'Authenticate']);
 $router->post('/request_checksheet/store', 'RequestChecksheet@store', ['middleware' => 'Authenticate']);
 $router->get('/request_checksheet/show/{id}', 'RequestChecksheet@show', ['middleware' => 'Authenticate']);
+$router->post('/request_checksheet/cancel/{id}', 'RequestChecksheet@cancel', ['middleware' => 'Authenticate']);
+$router->get('/request_checksheet/export', 'RequestChecksheet@export', ['middleware' => 'Authenticate']);
 $router->get('/request_checksheet/search-checksheet', 'RequestChecksheet@searchChecksheet', ['middleware' => 'Authenticate']);
 
 // Request Checksheet routes (Admin) - WITH admin middleware
 $router->get('/admin/request_checksheet', 'RequestChecksheet@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/request_checksheet/show/{id}', 'RequestChecksheet@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/request_checksheet/update_status/{id}', 'RequestChecksheet@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/request_checksheet/export', 'RequestChecksheet@export', ['middleware' => ['Authenticate', 'Admin']]);
 
 // Request ID routes (Admin) - WITH admin middleware
 $router->get('/admin/request-id', 'RequestID@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/request-id/export', 'RequestID@export', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/request-id/{id}', 'RequestID@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/request-id/{id}/update-status', 'RequestID@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
 
@@ -106,6 +115,7 @@ $router->get('/requests/memo', 'RequestMemo@index', ['middleware' => 'Authentica
 $router->get('/requests/memo/create', 'RequestMemo@create', ['middleware' => 'Authenticate']);
 $router->post('/requests/memo/store', 'RequestMemo@store', ['middleware' => 'Authenticate']);
 $router->get('/requests/memo/show/{id}', 'RequestMemo@show', ['middleware' => 'Authenticate']);
+$router->post('/requests/memo/cancel/{id}', 'RequestMemo@cancel', ['middleware' => 'Authenticate']);
 
 // Request Memo routes (Admin) - WITH admin middleware
 $router->get('/admin/requests/memo', 'RequestMemo@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);

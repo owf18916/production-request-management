@@ -35,28 +35,54 @@
 
         <!-- Search and Filter -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <form method="GET" class="flex flex-col sm:flex-row gap-4">
-                <div class="flex-1">
-                    <input type="text" name="search" value="<?php echo htmlspecialchars($search ?? ''); ?>" 
-                           placeholder="Search by request number, checksheet, or requester..." 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <form method="GET" class="space-y-4">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" name="search" value="<?php echo htmlspecialchars($search ?? ''); ?>" 
+                               placeholder="Search by request number, checksheet, or requester..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Status</option>
+                        <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                        <option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                        <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                        <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    </select>
                 </div>
-                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">All Status</option>
-                    <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                    <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
-                    <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                </select>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
-                    Search
-                </button>
-                <?php if ($search || $status): ?>
-                    <a href="<?php echo url('admin/request_checksheet'); ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition">
-                        Reset
-                    </a>
-                <?php endif; ?>
+
+                <div class="flex gap-4 flex-wrap items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                        <input type="date" name="start_date" value="<?php echo htmlspecialchars($startDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                        <input type="date" name="end_date" value="<?php echo htmlspecialchars($endDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                        Search
+                    </button>
+                    <?php if ($search || $status || $startDate || $endDate): ?>
+                        <a href="<?php echo url('admin/request_checksheet'); ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                            Reset
+                        </a>
+                    <?php endif; ?>
+                </div>
             </form>
+
+            <!-- Export Button -->
+            <?php if (!empty($startDate) && !empty($endDate)): ?>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <a href="<?php echo url('admin/request_checksheet/export?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)); ?>" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export to Excel
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Requests Table -->

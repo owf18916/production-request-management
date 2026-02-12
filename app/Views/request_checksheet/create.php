@@ -138,7 +138,6 @@ function requestForm() {
                             type="number" 
                             name="items[${index}][qty]"
                             min="1"
-                            value="1"
                             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter quantity"
                         >
@@ -300,9 +299,5 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    const form = requestForm();
-    form.init();
-});
+// Initialize on page load (Alpine.js will handle init automatically)
 </script>

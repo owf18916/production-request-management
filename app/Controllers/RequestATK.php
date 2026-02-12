@@ -26,6 +26,8 @@ class RequestATK extends Controller
 
         $search = $this->input('search');
         $statusFilter = $this->input('status');
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
 
         if ($userRole === 'admin') {
             // Admin sees all requests
@@ -54,11 +56,21 @@ class RequestATK extends Controller
             });
         }
 
+        // Apply date range filter
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
+
         $this->setTitle('Request ATK');
         $this->view('request_atk/index', [
             'requests' => array_values($requests),
             'search' => $search,
             'statusFilter' => $statusFilter,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
         ]);
     }
@@ -279,6 +291,56 @@ class RequestATK extends Controller
     }
 
     /**
+     * Cancel - Cancel own pending request (PIC)
+     */
+    public function cancel(int $id): void
+    {
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $request = RequestATKModel::findById($id);
+
+        if (!$request) {
+            $this->redirect(url('requests/atk'), 'error', 'Request not found');
+        }
+
+        // Check authorization - PIC can only cancel own requests
+        if ($request->requested_by != $userId) {
+            $this->redirect(url('requests/atk'), 'error', 'Unauthorized access');
+        }
+
+        // Check if request can be cancelled (only pending can be cancelled)
+        if ($request->status === 'approved') {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Cannot cancel an approved request');
+        }
+
+        if ($request->status === 'completed') {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Cannot cancel a completed request');
+        }
+
+        if ($request->status === 'cancelled') {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Request is already cancelled');
+        }
+
+        // Update status to cancelled with cancellation note
+        $success = RequestATKModel::updateStatus(
+            $id,
+            'cancelled',
+            $userId,
+            'Cancelled by requester'
+        );
+
+        if ($success) {
+            $this->redirect(url("requests/atk/show/{$id}"), 'success', 'Request cancelled successfully');
+        } else {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Failed to cancel request');
+        }
+    }
+
+    /**
      * Admin Index - List all requests (Admin only)
      */
     public function adminIndex(): void
@@ -432,5 +494,76 @@ class RequestATK extends Controller
     {
         $this->data['title'] = $title;
         return $this;
+    }
+
+    /**
+     * Export - Export requests to Excel
+     */
+    public function export(): void
+    {
+        $userId = Session::get('user_id');
+        $userRole = Session::get('user_role');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        // Validate date range
+        if (!$startDate || !$endDate) {
+            Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
+            $this->redirect(url('admin/requests/atk'));
+            return;
+        }
+
+        $validation = validateDateRange($startDate, $endDate);
+        if ($validation !== true) {
+            Session::flash('error', $validation);
+            $this->redirect(url('admin/requests/atk'));
+            return;
+        }
+
+        // Get requests based on role
+        if ($userRole === 'admin') {
+            $requests = RequestATKModel::getAll();
+        } else {
+            $requests = RequestATKModel::getByUser($userId);
+        }
+
+        // Apply date range filter
+        $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+            $createdDate = date('Y-m-d', strtotime($request->created_at));
+            return $createdDate >= $startDate && $createdDate <= $endDate;
+        });
+
+        // Prepare data for export
+        $headers = ['Request Number', 'ATK Name', 'Qty', 'Status', 'Requester', 'Created Date'];
+        $data = [];
+
+        foreach ($requests as $request) {
+            // Get ATK name
+            $atk = MasterATKModel::findById($request->atk_id);
+            $atkName = $atk ? $atk->nama_barang : 'N/A';
+
+            // Get requester name
+            $requester = UserModel::getUserById($request->requested_by);
+            $requesterName = $requester ? $requester->full_name : 'N/A';
+
+            $data[] = [
+                $request->request_number,
+                $atkName,
+                $request->qty,
+                ucfirst($request->status),
+                $requesterName,
+                date('Y-m-d H:i:s', strtotime($request->created_at)),
+            ];
+        }
+
+        // Export to Excel
+        $filename = 'Request_ATK_' . date('Y-m-d_His');
+        error_log("Exporting with filename: " . $filename . ", data rows: " . count($data));
+        exportExcel($filename, $headers, $data);
     }
 }
