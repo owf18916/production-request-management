@@ -37,7 +37,7 @@ class RequestChecksheet extends Controller
             $requests = array_filter($requests, function ($req) use ($search) {
                 $query = strtolower($search);
                 return strpos(strtolower($req->request_number), $query) !== false ||
-                       strpos(strtolower($req->judul_checksheet), $query) !== false;
+                       strpos(strtolower($req->nama_checksheet ?? ''), $query) !== false;
             });
         }
 
@@ -327,7 +327,7 @@ class RequestChecksheet extends Controller
             $requests = array_filter($requests, function ($req) use ($search) {
                 $query = strtolower($search);
                 return strpos(strtolower($req->request_number), $query) !== false ||
-                       strpos(strtolower($req->judul_checksheet), $query) !== false ||
+                       strpos(strtolower($req->nama_checksheet ?? ''), $query) !== false ||
                        strpos(strtolower($req->full_name), $query) !== false;
             });
         }
@@ -464,7 +464,7 @@ class RequestChecksheet extends Controller
         $results = array_filter($allChecksheets, function ($cs) use ($query) {
             $q = strtolower($query);
             return strpos(strtolower($cs->kode_checksheet ?? ''), $q) !== false ||
-                   strpos(strtolower($cs->judul_checksheet ?? ''), $q) !== false;
+                   strpos(strtolower($cs->nama_checksheet ?? ''), $q) !== false;
         });
 
         echo json_encode(['results' => array_values($results)]);
@@ -523,13 +523,17 @@ class RequestChecksheet extends Controller
         });
 
         // Prepare data for export
-        $headers = ['Request Number', 'Checksheet', 'Qty', 'Status', 'Requester', 'Created Date'];
+        $headers = ['Request Number', 'Checksheet', 'Qty', 'Conveyor', 'Shift', 'Status', 'Requester', 'Created Date'];
         $data = [];
 
         foreach ($requests as $request) {
             // Get checksheet name
             $checksheet = MasterChecksheet::findById($request->checksheet_id);
-            $checksheetName = $checksheet ? $checksheet->judul_checksheet : 'N/A';
+            $checksheetName = $checksheet ? $checksheet->nama_checksheet : 'N/A';
+
+            // Get conveyor name
+            $conveyor = ConveyorModel::findById($request->conveyor_id);
+            $conveyorName = $conveyor ? $conveyor->conveyor_name : 'N/A';
 
             // Get requester name
             $requester = User::getUserById($request->requested_by);
@@ -539,6 +543,8 @@ class RequestChecksheet extends Controller
                 $request->request_number,
                 $checksheetName,
                 $request->qty,
+                $conveyorName,
+                $request->shift ?? 'N/A',
                 ucfirst($request->status),
                 $requesterName,
                 date('Y-m-d H:i:s', strtotime($request->created_at)),

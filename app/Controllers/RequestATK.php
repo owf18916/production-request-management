@@ -539,13 +539,17 @@ class RequestATK extends Controller
         });
 
         // Prepare data for export
-        $headers = ['Request Number', 'ATK Name', 'Qty', 'Status', 'Requester', 'Created Date'];
+        $headers = ['Request Number', 'ATK Name', 'Qty', 'Conveyor', 'Shift', 'Status', 'Requester', 'Created Date'];
         $data = [];
 
         foreach ($requests as $request) {
             // Get ATK name
             $atk = MasterATKModel::findById($request->atk_id);
             $atkName = $atk ? $atk->nama_barang : 'N/A';
+
+            // Get conveyor name
+            $conveyor = ConveyorModel::findById($request->conveyor_id);
+            $conveyorName = $conveyor ? $conveyor->conveyor_name : 'N/A';
 
             // Get requester name
             $requester = UserModel::getUserById($request->requested_by);
@@ -555,6 +559,8 @@ class RequestATK extends Controller
                 $request->request_number,
                 $atkName,
                 $request->qty,
+                $conveyorName,
+                $request->shift ?? 'N/A',
                 ucfirst($request->status),
                 $requesterName,
                 date('Y-m-d H:i:s', strtotime($request->created_at)),

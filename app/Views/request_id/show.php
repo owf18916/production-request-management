@@ -111,20 +111,26 @@
                                     </p>
                                 </div>
                             <?php endforeach; ?>
+                            
+                            <?php if ($request->notes): ?>
+                                <div class="pb-3 border-b border-gray-200 last:border-0">
+                                    <label class="text-sm font-medium text-gray-600">Notes</label>
+                                    <p class="text-gray-900 mt-1">
+                                        <?php 
+                                            if (strlen($request->notes) > 100) {
+                                                echo '<pre class="bg-gray-50 p-3 rounded text-sm">' . htmlspecialchars($request->notes) . '</pre>';
+                                            } else {
+                                                echo htmlspecialchars($request->notes);
+                                            }
+                                        ?>
+                                    </p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <p class="text-gray-600">No details recorded</p>
                     <?php endif; ?>
                 </div>
-
-                <?php if ($request->notes): ?>
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Notes</h2>
-                        <div class="bg-blue-50 p-4 rounded border border-blue-200">
-                            <p class="text-gray-900"><?php echo htmlspecialchars($request->notes); ?></p>
-                        </div>
-                    </div>
-                <?php endif; ?>
             </div>
 
             <!-- Sidebar - History Timeline -->

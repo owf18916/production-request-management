@@ -510,7 +510,7 @@ class RequestID extends Controller
         });
 
         // Prepare data for export
-        $headers = ['Request Number', 'ID Type', 'Status', 'Requester', 'Created Date'];
+        $headers = ['Request Number', 'ID Type', 'Conveyor', 'Shift', 'Status', 'Requester', 'Created Date'];
         $data = [];
 
         $typeLabels = [
@@ -522,6 +522,10 @@ class RequestID extends Controller
         ];
 
         foreach ($requests as $request) {
+            // Get conveyor name
+            $conveyor = ConveyorModel::findById($request->conveyor_id);
+            $conveyorName = $conveyor ? $conveyor->conveyor_name : 'N/A';
+
             // Get requester name
             $requester = UserModel::getUserById($request->requested_by);
             $requesterName = $requester ? $requester->full_name : 'N/A';
@@ -531,6 +535,8 @@ class RequestID extends Controller
             $data[] = [
                 $request->request_number,
                 $idTypeLabel,
+                $conveyorName,
+                $request->shift ?? 'N/A',
                 ucfirst($request->status),
                 $requesterName,
                 date('Y-m-d H:i:s', strtotime($request->created_at)),

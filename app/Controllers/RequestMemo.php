@@ -458,14 +458,20 @@ class RequestMemo extends Controller
         });
 
         // Prepare data for export
-        $headers = ['Request Number', 'Requester', 'Memo Content', 'Status', 'Created Date'];
+        $headers = ['Request Number', 'Requester', 'Memo Content', 'Conveyor', 'Shift', 'Status', 'Created Date'];
         $data = [];
 
         foreach ($requests as $request) {
+            // Get conveyor name
+            $conveyor = ConveyorModel::findById($request->conveyor_id);
+            $conveyorName = $conveyor ? $conveyor->conveyor_name : 'N/A';
+
             $data[] = [
                 $request->request_number,
                 $request->requester,
                 substr($request->memo_content, 0, 100),
+                $conveyorName,
+                $request->shift ?? 'N/A',
                 ucfirst($request->status),
                 date('Y-m-d H:i:s', strtotime($request->created_at)),
             ];
