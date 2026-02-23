@@ -54,7 +54,7 @@ $path_for_check = '/' . ltrim($path_for_check, '/');
 
 // Check if this is an export route (before query string)
 $path_before_query = explode('?', $path_for_check)[0];
-$exportRoutes = ['/admin/requests/atk/export', '/admin/request-id/export', '/admin/request_checksheet/export', '/requests/atk/export', '/request-id/export', '/request_checksheet/export'];
+$exportRoutes = ['/admin/requests/atk/export', '/admin/request-id/export', '/admin/request_checksheet/export', '/admin/requests/memo/export', '/requests/atk/export', '/request-id/export', '/request_checksheet/export'];
 foreach ($exportRoutes as $route) {
     if ($path_before_query === $route) {
         $is_export = true;

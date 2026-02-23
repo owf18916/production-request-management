@@ -193,8 +193,19 @@ class RequestATK extends Model
      */
     public static function countByStatus(string $status): int
     {
-        $sql = "SELECT COUNT(*) as count FROM request_atk WHERE status = ?";
-        $result = Database::row($sql, [$status]);
+        if ($status === 'pending') {
+            // Pending: no approval yet (approved_at is null)
+            $sql = "SELECT COUNT(*) as count FROM request_atk WHERE approved_at IS NULL AND status != 'rejected' AND status != 'completed'";
+            $result = Database::row($sql);
+        } elseif ($status === 'approved') {
+            // Approved: has approved_at timestamp
+            $sql = "SELECT COUNT(*) as count FROM request_atk WHERE approved_at IS NOT NULL";
+            $result = Database::row($sql);
+        } else {
+            // Rejected or Completed: based on status field
+            $sql = "SELECT COUNT(*) as count FROM request_atk WHERE status = ?";
+            $result = Database::row($sql, [$status]);
+        }
         return $result->count ?? 0;
     }
 

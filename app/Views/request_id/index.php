@@ -23,11 +23,11 @@
                 <div class="text-sm text-gray-600">Total Requests</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="text-2xl font-bold text-yellow-600"><?php echo count(array_filter($requests, fn($r) => $r->status === 'pending')); ?></div>
+                <div class="text-2xl font-bold text-yellow-600"><?php echo count(array_filter($requests, fn($r) => empty($r->approved_at) && $r->status !== 'rejected' && $r->status !== 'completed')); ?></div>
                 <div class="text-sm text-gray-600">Pending</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="text-2xl font-bold text-green-600"><?php echo count(array_filter($requests, fn($r) => $r->status === 'approved')); ?></div>
+                <div class="text-2xl font-bold text-green-600"><?php echo count(array_filter($requests, fn($r) => !empty($r->approved_at))); ?></div>
                 <div class="text-sm text-gray-600">Approved</div>
             </div>
             <div class="bg-white rounded-lg shadow p-6">
@@ -118,13 +118,15 @@
                                             'pending' => 'bg-yellow-100 text-yellow-800',
                                             'approved' => 'bg-green-100 text-green-800',
                                             'rejected' => 'bg-red-100 text-red-800',
-                                            'completed' => 'bg-blue-100 text-blue-800'
+                                            'completed' => 'bg-blue-100 text-blue-800',
+                                            'cancelled' => 'bg-gray-100 text-gray-800'
                                         ];
                                         $statusLabels = [
                                             'pending' => 'Pending',
                                             'approved' => 'Approved',
                                             'rejected' => 'Rejected',
-                                            'completed' => 'Completed'
+                                            'completed' => 'Completed',
+                                            'cancelled' => 'Cancelled'
                                         ];
                                     ?>
                                     <span class="px-2 py-1 rounded <?php echo $statusColors[$request->status]; ?>">

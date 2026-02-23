@@ -7,7 +7,7 @@ ob_start();
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
             <h1 class="text-4xl font-bold text-gray-900">Welcome to Production Request Management System</h1>
-            <p class="mt-4 text-xl text-gray-600">A native PHP MVC application built with OOP principles</p>
+            <!-- <p class="mt-4 text-xl text-gray-600">A native PHP MVC application built with OOP principles</p> -->
 
             <div class="mt-8 space-x-4">
                 <?php if (!session('user_id')): ?>
@@ -62,7 +62,7 @@ ob_start();
         </div>
 
         <!-- Tech Stack -->
-        <div class="mt-16 bg-white rounded-lg shadow p-8">
+        <!-- <div class="mt-16 bg-white rounded-lg shadow p-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Technology Stack</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
@@ -98,6 +98,6 @@ ob_start();
                     </ul>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>

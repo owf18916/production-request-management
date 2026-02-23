@@ -126,8 +126,8 @@ class Dashboard extends Controller
         if ($role === 'admin') {
             return [
                 'pending' => DashboardModel::getTotalPendingRequestsAdmin(),
-                'approved_today' => DashboardModel::getTotalApprovedTodayAdmin(),
-                'rejected_today' => DashboardModel::getTotalRejectedTodayAdmin(),
+                'approved_month' => DashboardModel::getTotalApprovedThisMonthAdmin(),
+                'rejected_month' => DashboardModel::getTotalRejectedThisMonthAdmin(),
                 'completed_month' => DashboardModel::getTotalCompletedThisMonthAdmin(),
             ];
         } else {
@@ -248,5 +248,22 @@ class Dashboard extends Controller
                 'has_active' => false,
             ]);
         }
+    }
+
+    /**
+     * DEBUG: Show approved status information
+     */
+    public function debugApprovedStatus(): void
+    {
+        if (Session::get('user_role') !== 'admin') {
+            http_response_code(403);
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $debugInfo = DashboardModel::debugApprovedStatus();
+        
+        header('Content-Type: application/json');
+        echo json_encode($debugInfo, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 }

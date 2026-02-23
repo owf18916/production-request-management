@@ -30,7 +30,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'pending')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => empty($r->approved_at) && $r->status !== 'rejected' && $r->status !== 'completed')); ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'approved')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => !empty($r->approved_at))); ?></dd>
                         </dl>
                     </div>
                 </div>

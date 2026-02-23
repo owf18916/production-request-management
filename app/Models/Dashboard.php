@@ -91,6 +91,95 @@ class Dashboard extends Model
     }
 
     /**
+     * Get total approved requests this month for admin (all types)
+     * NOTE: We count by approved_at field instead of status because status may not be consistently updated
+     */
+    public static function getTotalApprovedThisMonthAdmin(): int
+    {
+        $tables = ['request_atk', 'request_checksheet', 'request_id', 'request_memo'];
+        $total = 0;
+        
+        // Get first and last day of current month
+        $firstDay = date('Y-m-01 00:00:00');
+        $lastDay = date('Y-m-t 23:59:59');
+        
+        foreach ($tables as $table) {
+            // Count all records with approved_at in current month
+            // We use approved_at as the indicator of approval, not status field
+            $sql = "SELECT COUNT(*) as total FROM $table 
+                    WHERE approved_at IS NOT NULL
+                    AND approved_at >= ? AND approved_at <= ?";
+            $result = Database::row($sql, [$firstDay, $lastDay]);
+            $total += $result ? (int)$result->total : 0;
+        }
+        
+        return $total;
+    }
+
+    /**
+     * DEBUG: Get status values and counts for all approved records with approved_at in current month
+     */
+    public static function debugApprovedStatus(): array
+    {
+        $tables = ['request_atk', 'request_checksheet', 'request_id', 'request_memo'];
+        $debugInfo = [];
+        
+        $firstDay = date('Y-m-01 00:00:00');
+        $lastDay = date('Y-m-t 23:59:59');
+        
+        foreach ($tables as $table) {
+            $debugInfo[$table] = [];
+            
+            // Check all records with approved_at in current month
+            $sql = "SELECT status, COUNT(*) as count FROM $table 
+                    WHERE approved_at >= ? AND approved_at <= ?
+                    GROUP BY status";
+            $results = Database::results($sql, [$firstDay, $lastDay]);
+            $debugInfo[$table]['by_status'] = $results;
+            
+            // Check for empty/null status
+            $sql = "SELECT COUNT(*) as total FROM $table 
+                    WHERE approved_at >= ? AND approved_at <= ? 
+                    AND (status = '' OR status IS NULL)";
+            $result = Database::row($sql, [$firstDay, $lastDay]);
+            $debugInfo[$table]['empty_status_count'] = $result ? (int)$result->total : 0;
+            
+            // Check for 'approved' status explicitly
+            $sql = "SELECT COUNT(*) as total FROM $table 
+                    WHERE approved_at >= ? AND approved_at <= ? 
+                    AND status = 'approved'";
+            $result = Database::row($sql, [$firstDay, $lastDay]);
+            $debugInfo[$table]['approved_status_count'] = $result ? (int)$result->total : 0;
+            
+            // Get all unique status values in table
+            $sql = "SELECT DISTINCT status FROM $table WHERE approved_at IS NOT NULL";
+            $results = Database::results($sql);
+            $debugInfo[$table]['all_unique_status'] = $results;
+        }
+        
+        return $debugInfo;
+    }
+
+    /**
+     */
+    public static function getTotalRejectedThisMonthAdmin(): int
+    {
+        $tables = ['request_atk', 'request_checksheet', 'request_id', 'request_memo'];
+        $total = 0;
+        $currentMonth = date('Y-m');
+        
+        foreach ($tables as $table) {
+            $sql = "SELECT COUNT(*) as total FROM $table 
+                    WHERE status = 'rejected'
+                    AND DATE_FORMAT(updated_at, '%Y-%m') = ?";
+            $result = Database::row($sql, [$currentMonth]);
+            $total += $result ? (int)$result->total : 0;
+        }
+        
+        return $total;
+    }
+
+    /**
      * Get total completed requests this month for admin (all types)
      */
     public static function getTotalCompletedThisMonthAdmin(): int

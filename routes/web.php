@@ -119,6 +119,7 @@ $router->post('/requests/memo/cancel/{id}', 'RequestMemo@cancel', ['middleware' 
 
 // Request Memo routes (Admin) - WITH admin middleware
 $router->get('/admin/requests/memo', 'RequestMemo@adminIndex', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/requests/memo/export', 'RequestMemo@export', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/requests/memo/show/{id}', 'RequestMemo@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/requests/memo/update-status/{id}', 'RequestMemo@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
 
@@ -128,3 +129,5 @@ $router->post('/api/requests', 'Api\Request@store', ['middleware' => 'Authentica
 $router->get('/api/atk/search', 'Api\Request@searchATK', ['middleware' => 'Authenticate']);
 $router->get('/api/checksheet/search', 'Api\Request@searchChecksheet', ['middleware' => 'Authenticate']);
 $router->get('/api/id-types/search', 'Api\Request@searchIDTypes', ['middleware' => 'Authenticate']);
+// DEBUG routes - Temporary for troubleshooting
+$router->get('/debug/approved-status', 'Dashboard@debugApprovedStatus', ['middleware' => ['Authenticate', 'Admin']]);

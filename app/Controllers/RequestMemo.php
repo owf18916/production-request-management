@@ -284,8 +284,8 @@ class RequestMemo extends Controller
     {
         $search = $this->input('search');
         $status = $this->input('status');
-        $dateFrom = $this->input('date_from');
-        $dateTo = $this->input('date_to');
+        $startDate = $this->input('start_date', '');
+        $endDate = $this->input('end_date', '');
         
         $requests = RequestMemoModel::getAll();
         
@@ -302,16 +302,11 @@ class RequestMemo extends Controller
                 return $req->status === $status;
             });
         }
-        
-        if ($dateFrom) {
-            $requests = array_filter($requests, function($req) use ($dateFrom) {
-                return strtotime($req->created_at) >= strtotime($dateFrom);
-            });
-        }
-        
-        if ($dateTo) {
-            $requests = array_filter($requests, function($req) use ($dateTo) {
-                return strtotime($req->created_at) <= strtotime($dateTo . ' 23:59:59');
+
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($req) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($req->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
             });
         }
 
@@ -320,8 +315,8 @@ class RequestMemo extends Controller
             'requests' => array_values($requests),
             'search' => $search,
             'status' => $status,
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
             'pendingCount' => RequestMemoModel::countByStatus('pending'),
             'approvedCount' => RequestMemoModel::countByStatus('approved'),
@@ -422,5 +417,63 @@ class RequestMemo extends Controller
     {
         $csrfToken = $this->input('_csrf_token');
         return Session::verifyToken($csrfToken);
+    }
+
+    /**
+     * Export - Export memo requests to Excel
+     */
+    public function export(): void
+    {
+        $userId = Session::get('user_id');
+        $userRole = Session::get('user_role');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        // Validate date range
+        if (!$startDate || !$endDate) {
+            Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
+            $this->redirect(url('admin/requests/memo'));
+            return;
+        }
+
+        $validation = validateDateRange($startDate, $endDate);
+        if ($validation !== true) {
+            Session::flash('error', $validation);
+            $this->redirect(url('admin/requests/memo'));
+            return;
+        }
+
+        // Get all requests
+        $requests = RequestMemoModel::getAll();
+
+        // Apply date range filter
+        $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+            $createdDate = date('Y-m-d', strtotime($request->created_at));
+            return $createdDate >= $startDate && $createdDate <= $endDate;
+        });
+
+        // Prepare data for export
+        $headers = ['Request Number', 'Requester', 'Memo Content', 'Status', 'Created Date'];
+        $data = [];
+
+        foreach ($requests as $request) {
+            $data[] = [
+                $request->request_number,
+                $request->requester,
+                substr($request->memo_content, 0, 100),
+                ucfirst($request->status),
+                date('Y-m-d H:i:s', strtotime($request->created_at)),
+            ];
+        }
+
+        // Export to Excel
+        $filename = 'Request_Memo_' . date('Y-m-d_His');
+        error_log("Exporting memo with filename: " . $filename . ", data rows: " . count($data));
+        exportExcel($filename, $headers, $data);
     }
 }

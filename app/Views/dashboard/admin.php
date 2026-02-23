@@ -23,41 +23,41 @@
                         </div>
                         <div class="bg-yellow-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Approved Today Card -->
+            <!-- Total Approved This Month Card -->
             <div class="block">
                 <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Disetujui Hari Ini</p>
-                            <p class="text-3xl font-bold text-green-600 mt-2"><?php echo $stats['approved_today']; ?></p>
+                            <p class="text-gray-500 text-sm font-medium">Disetujui Bulan Ini</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2"><?php echo $stats['approved_month']; ?></p>
                         </div>
                         <div class="bg-green-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Rejected Today Card -->
+            <!-- Total Rejected This Month Card -->
             <div class="block">
                 <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6 cursor-pointer">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Ditolak Hari Ini</p>
-                            <p class="text-3xl font-bold text-red-600 mt-2"><?php echo $stats['rejected_today']; ?></p>
+                            <p class="text-gray-500 text-sm font-medium">Ditolak Bulan Ini</p>
+                            <p class="text-3xl font-bold text-red-600 mt-2"><?php echo $stats['rejected_month']; ?></p>
                         </div>
                         <div class="bg-red-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2"></path>
                             </svg>
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="bg-blue-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7 12a5 5 0 1110 0 5 5 0 01-10 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7 12a5 5 0 1110 0 5 5 0 01-10 0z"></path>
                             </svg>
                         </div>
                     </div>

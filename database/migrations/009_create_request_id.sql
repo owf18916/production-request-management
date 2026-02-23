@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS request_id (
     id INT PRIMARY KEY AUTO_INCREMENT,
     request_number VARCHAR(50) UNIQUE NOT NULL,
     id_type ENUM('id_punggung', 'pin_4m', 'id_kaki', 'job_psd', 'id_other') NOT NULL,
-    status ENUM('pending', 'approved', 'rejected', 'completed') DEFAULT 'pending' NOT NULL,
+    status ENUM('pending', 'approved', 'rejected', 'completed', 'cancelled') DEFAULT 'pending' NOT NULL,
     requested_by INT NOT NULL,
     approved_by INT NULL,
     approved_at TIMESTAMP NULL,

@@ -50,13 +50,15 @@
                                         'pending' => 'bg-yellow-100 text-yellow-800',
                                         'approved' => 'bg-green-100 text-green-800',
                                         'rejected' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-blue-100 text-blue-800'
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800'
                                     ];
                                     $statusLabels = [
                                         'pending' => 'Pending',
                                         'approved' => 'Approved',
                                         'rejected' => 'Rejected',
-                                        'completed' => 'Completed'
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled'
                                     ];
                                 ?>
                                 <span class="px-3 py-1 rounded-full text-sm font-medium <?php echo $statusColors[$request->status]; ?>">
