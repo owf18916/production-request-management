@@ -41,7 +41,7 @@
                             <div class="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                 <a href="<?php echo url('/admin/requests/atk'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">ATK Requests</a>
                                 <a href="<?php echo url('/admin/request_checksheet'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Checksheet Requests</a>
-                                <a href="<?php echo url('/admin/request_id'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">ID Requests</a>
+                                <a href="<?php echo url('/admin/request-id'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">ID Requests</a>
                                 <a href="<?php echo url('/admin/requests/memo'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Internal Memo</a>
                             </div>
                         </div>

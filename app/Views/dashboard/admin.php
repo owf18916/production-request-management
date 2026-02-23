@@ -118,7 +118,7 @@
                     <a href="<?php echo url('/admin/request_checksheet'); ?>" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded hover:bg-blue-700 transition-colors text-sm font-medium">
                         Request Checksheet
                     </a>
-                    <a href="<?php echo url('/admin/request_id'); ?>" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded hover:bg-blue-700 transition-colors text-sm font-medium">
+                    <a href="<?php echo url('/admin/request-id'); ?>" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded hover:bg-blue-700 transition-colors text-sm font-medium">
                         Request ID
                     </a>
                     <a href="<?php echo url('/admin/requests/memo'); ?>" class="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded hover:bg-blue-700 transition-colors text-sm font-medium">

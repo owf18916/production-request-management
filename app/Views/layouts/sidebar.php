@@ -53,7 +53,7 @@
                                 <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
                                 Checksheet
                             </a>
-                            <a href="<?php echo url('/admin/request_id'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                            <a href="<?php echo url('/admin/request-id'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
                                 <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
                                 ID Requests
                             </a>

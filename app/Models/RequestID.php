@@ -172,7 +172,7 @@ class RequestID extends Model
      */
     public static function getDetails(int $requestId): array
     {
-        $sql = "SELECT field_name, field_value FROM request_id_details
+        $sql = "SELECT detail_key, detail_value FROM request_id_details
                 WHERE request_id_id = ?
                 ORDER BY created_at ASC";
         return Database::results($sql, [$requestId]);
@@ -190,7 +190,7 @@ class RequestID extends Model
             
             // Insert new details
             foreach ($details as $fieldName => $fieldValue) {
-                $sql = "INSERT INTO request_id_details (request_id_id, field_name, field_value)
+                $sql = "INSERT INTO request_id_details (request_id_id, detail_key, detail_value)
                         VALUES (?, ?, ?)";
                 Database::query($sql, [$requestId, $fieldName, $fieldValue]);
             }

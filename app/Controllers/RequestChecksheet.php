@@ -310,6 +310,8 @@ class RequestChecksheet extends Controller
     {
         $search = $this->input('search');
         $status = $this->input('status');
+        $startDate = $this->input('start_date', '');
+        $endDate = $this->input('end_date', '');
         
         $requests = RequestChecksheetModel::getAll();
 
@@ -330,11 +332,21 @@ class RequestChecksheet extends Controller
             });
         }
 
+        // Apply date range filter
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
+
         $this->setTitle('Request Checksheet Management');
         $this->view('admin/request_checksheet/admin_index', [
             'requests' => array_values($requests),
             'search' => $search,
             'status' => $status,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
             'pendingCount' => RequestChecksheetModel::countByStatus('pending'),
             'approvedCount' => RequestChecksheetModel::countByStatus('approved'),

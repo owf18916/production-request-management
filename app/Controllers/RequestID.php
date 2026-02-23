@@ -276,7 +276,7 @@ class RequestID extends Controller
         // Convert details to associative array
         $detailsArray = [];
         foreach ($details as $detail) {
-            $detailsArray[$detail->field_name] = $detail->field_value;
+            $detailsArray[$detail->detail_key] = $detail->detail_value;
         }
 
         $this->setTitle('Request ID Detail');
@@ -341,6 +341,8 @@ class RequestID extends Controller
         $search = $this->input('search', '');
         $idTypeFilter = $this->input('id_type', '');
         $statusFilter = $this->input('status', '');
+        $startDate = $this->input('start_date', '');
+        $endDate = $this->input('end_date', '');
 
         $requests = RequestIDModel::getAll();
 
@@ -358,12 +360,22 @@ class RequestID extends Controller
             );
         }
 
+        // Apply date range filter
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
+
         $this->setTitle('All ID Requests');
         $this->view('admin/request_id/admin_index', [
             'requests' => $requests,
             'search' => $search,
             'idTypeFilter' => $idTypeFilter,
             'statusFilter' => $statusFilter,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
             'idTypes' => RequestIDModel::VALID_ID_TYPES,
         ]);
@@ -387,7 +399,7 @@ class RequestID extends Controller
         // Convert details to associative array
         $detailsArray = [];
         foreach ($details as $detail) {
-            $detailsArray[$detail->field_name] = $detail->field_value;
+            $detailsArray[$detail->detail_key] = $detail->detail_value;
         }
 
         $this->setTitle('Request ID Detail');
