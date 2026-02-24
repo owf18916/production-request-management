@@ -18,6 +18,8 @@ class RequestMemo extends Controller
     {
         $search = $this->input('search');
         $status = $this->input('status');
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
         
         $requests = RequestMemoModel::getByUser(session('user_id'));
         
@@ -34,11 +36,21 @@ class RequestMemo extends Controller
             });
         }
 
-        $this->setTitle('Internal Memo Requests');
+        // Apply date range filter
+        if ($startDate && $endDate) {
+            $requests = array_filter($requests, function($request) use ($startDate, $endDate) {
+                $createdDate = date('Y-m-d', strtotime($request->created_at));
+                return $createdDate >= $startDate && $createdDate <= $endDate;
+            });
+        }
+
+        $this->setTitle('Request Memo');
         $this->view('request_memo/index', [
             'requests' => array_values($requests),
             'search' => $search,
             'status' => $status,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'totalCount' => count($requests),
         ]);
     }
@@ -310,6 +322,14 @@ class RequestMemo extends Controller
             });
         }
 
+        // Generate stats array
+        $stats = [
+            'pending' => RequestMemoModel::countByStatus('pending'),
+            'approved' => RequestMemoModel::countByStatus('approved'),
+            'rejected' => RequestMemoModel::countByStatus('rejected'),
+            'completed' => RequestMemoModel::countByStatus('completed'),
+        ];
+
         $this->setTitle('Manage Internal Memo Requests');
         $this->view('admin/request_memo/admin_index', [
             'requests' => array_values($requests),
@@ -318,10 +338,7 @@ class RequestMemo extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
             'totalCount' => count($requests),
-            'pendingCount' => RequestMemoModel::countByStatus('pending'),
-            'approvedCount' => RequestMemoModel::countByStatus('approved'),
-            'rejectedCount' => RequestMemoModel::countByStatus('rejected'),
-            'completedCount' => RequestMemoModel::countByStatus('completed'),
+            'stats' => $stats,
         ]);
     }
 

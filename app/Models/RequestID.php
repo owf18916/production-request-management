@@ -260,12 +260,12 @@ class RequestID extends Model
     public static function countByStatus(string $status): int
     {
         if ($status === 'pending') {
-            // Pending: no approval yet (approved_at is null)
-            $sql = "SELECT COUNT(*) as count FROM request_id WHERE approved_at IS NULL AND status != 'rejected' AND status != 'completed'";
+            // Pending: status = 'pending'
+            $sql = "SELECT COUNT(*) as count FROM request_id WHERE status = 'pending'";
             $result = Database::row($sql);
         } elseif ($status === 'approved') {
-            // Approved: has approved_at timestamp
-            $sql = "SELECT COUNT(*) as count FROM request_id WHERE approved_at IS NOT NULL";
+            // Approved: status = 'approved'
+            $sql = "SELECT COUNT(*) as count FROM request_id WHERE status = 'approved'";
             $result = Database::row($sql);
         } else {
             // Rejected or Completed: based on status field

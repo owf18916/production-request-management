@@ -368,6 +368,14 @@ class RequestID extends Controller
             });
         }
 
+        // Generate stats array
+        $stats = [
+            'pending' => RequestIDModel::countByStatus('pending'),
+            'approved' => RequestIDModel::countByStatus('approved'),
+            'rejected' => RequestIDModel::countByStatus('rejected'),
+            'completed' => RequestIDModel::countByStatus('completed'),
+        ];
+
         $this->setTitle('All ID Requests');
         $this->view('admin/request_id/admin_index', [
             'requests' => $requests,
@@ -378,6 +386,7 @@ class RequestID extends Controller
             'endDate' => $endDate,
             'totalCount' => count($requests),
             'idTypes' => RequestIDModel::VALID_ID_TYPES,
+            'stats' => $stats,
         ]);
     }
 

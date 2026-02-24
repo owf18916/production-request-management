@@ -1,81 +1,124 @@
-<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+﻿<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <!-- Header with Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <p class="text-gray-600 text-sm">Total Requests</p>
-                <p class="text-3xl font-bold text-gray-900"><?php echo $totalCount; ?></p>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600"><?php echo $pendingCount; ?></p>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <p class="text-gray-600 text-sm">Approved</p>
-                <p class="text-3xl font-bold text-blue-600"><?php echo $approvedCount; ?></p>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <p class="text-gray-600 text-sm">Completed</p>
-                <p class="text-3xl font-bold text-green-600"><?php echo $completedCount; ?></p>
-            </div>
-        </div>
-
         <!-- Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Request Checksheet Management</h1>
-            <p class="text-gray-600 mt-2">Manage and approve all checksheet requests</p>
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Checksheet Request Management</h1>
+                    <p class="mt-2 text-gray-600">Review and manage all checksheet requests</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Flash Messages -->
-        <?php if ($message = session('message')): ?>
-            <div class="mb-6 p-4 rounded-lg" style="background-color: <?php echo session('message_type') === 'success' ? '#dcfce7' : '#fee2e2'; ?>; border: 1px solid <?php echo session('message_type') === 'success' ? '#86efac' : '#fca5a5'; ?>;">
-                <p style="color: <?php echo session('message_type') === 'success' ? '#166534' : '#991b1b'; ?>"><?php echo $message; ?></p>
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-100">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $stats['pending'] ?? 0; ?></dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $stats['approved'] ?? 0; ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-red-100">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Rejected</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $stats['rejected'] ?? 0; ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $stats['completed'] ?? 0; ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Search and Filter -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
             <form method="GET" class="space-y-4">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <input type="text" name="search" value="<?php echo htmlspecialchars($search ?? ''); ?>" 
-                               placeholder="Search by request number, checksheet, or requester..." 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <input type="text" name="search" placeholder="Search request number or checksheet..." value="<?php echo htmlspecialchars($search ?? ''); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Status</option>
-                        <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                        <option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                        <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
-                        <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    </select>
+                    <div>
+                        <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All Status</option>
+                            <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                            <option value="approved" <?php echo $status === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                            <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                            <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                            <option value="cancelled" <?php echo $status === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="date" name="start_date" value="<?php echo htmlspecialchars($startDate ?? ''); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <input type="date" name="end_date" value="<?php echo htmlspecialchars($endDate ?? ''); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
                 </div>
-
-                <div class="flex gap-4 flex-wrap items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
-                        <input type="date" name="start_date" value="<?php echo htmlspecialchars($startDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
-                        <input type="date" name="end_date" value="<?php echo htmlspecialchars($endDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
-                        Search
-                    </button>
-                    <?php if ($search || $status || $startDate || $endDate): ?>
-                        <a href="<?php echo url('admin/request_checksheet'); ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition">
-                            Reset
-                        </a>
-                    <?php endif; ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Search</button>
+                    <a href="<?php echo url('admin/request_checksheet'); ?>" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Clear</a>
                 </div>
             </form>
-
+            
             <!-- Export Button -->
             <?php if (!empty($startDate) && !empty($endDate)): ?>
                 <div class="mt-4 pt-4 border-t border-gray-200">
-                    <a href="<?php echo url('admin/request_checksheet/export?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)); ?>" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <a href="<?php echo url('admin/request_checksheet/export?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)); ?>" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -86,87 +129,89 @@
         </div>
 
         <!-- Requests Table -->
-        <?php if (count($requests) > 0): ?>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <?php if (empty($requests)): ?>
+                <div class="p-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No requests found</h3>
+                </div>
+            <?php else: ?>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Request No</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Checksheet</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Requester</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Qty</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Conveyor</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Shift</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Action</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request No</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checksheet</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conveyor</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shift</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($requests as $request): ?>
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    <a href="<?php echo url("admin/request_checksheet/show/{$request->id}"); ?>" class="text-blue-600 hover:text-blue-800">
-                                        <?php echo htmlspecialchars($request->request_number); ?>
-                                    </a>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="font-mono text-xs font-medium text-gray-900"><?php echo $request->request_number; ?></span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    <?php echo htmlspecialchars($request->nama_checksheet ?? '-'); ?>
+                                <td class="px-4 py-3 whitespace-normal text-xs text-gray-700" style="max-width: 200px;">
+                                    <?php echo $request->nama_checksheet ?? '-'; ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    <?php echo htmlspecialchars($request->full_name ?? '-'); ?>
+                                <td class="px-4 py-3 whitespace-normal text-xs text-gray-700" style="max-width: 150px;">
+                                    <?php echo $request->full_name ?? '-'; ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    <?php echo htmlspecialchars($request->qty); ?>
+                                <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-700">
+                                    <?php echo $request->qty; ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-700">
                                     <?php echo $request->conveyor_name ?? '-'; ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-700">
                                     <?php echo $request->shift ?? '-'; ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <?php 
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <?php
                                     $statusColors = [
-                                        'pending' => '#fef08a',
-                                        'approved' => '#bfdbfe',
-                                        'rejected' => '#fecaca',
-                                        'completed' => '#bbf7d0',
+                                        'pending' => 'bg-yellow-100 text-yellow-800',
+                                        'approved' => 'bg-green-100 text-green-800',
+                                        'rejected' => 'bg-red-100 text-red-800',
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800',
                                     ];
-                                    $statusTextColors = [
-                                        'pending' => '#713f12',
-                                        'approved' => '#1e3a8a',
-                                        'rejected' => '#7f1d1d',
-                                        'completed' => '#166534',
+                                    $statusLabels = [
+                                        'pending' => 'Pending',
+                                        'approved' => 'Approved',
+                                        'rejected' => 'Rejected',
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled',
                                     ];
-                                    $bgColor = $statusColors[$request->status] ?? '#f3f4f6';
-                                    $textColor = $statusTextColors[$request->status] ?? '#374151';
+                                    $color = $statusColors[$request->status] ?? 'bg-gray-100 text-gray-800';
+                                    $label = $statusLabels[$request->status] ?? ucfirst($request->status);
                                     ?>
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold" style="background-color: <?php echo $bgColor; ?>; color: <?php echo $textColor; ?>;">
-                                        <?php echo ucfirst($request->status); ?>
+                                    <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $color; ?>">
+                                        <?php echo $label; ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    <?php echo date('d/m/Y H:i', strtotime($request->created_at)); ?>
+                                <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-700">
+                                    <?php echo date('d/m/Y', strtotime($request->created_at)); ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="<?php echo url("admin/request_checksheet/show/{$request->id}"); ?>" class="text-blue-600 hover:text-blue-800 font-medium">
-                                        Review
-                                    </a>
+                                <td class="px-4 py-3 whitespace-nowrap text-xs font-medium">
+                                    <a href="<?php echo url('admin/request_checksheet/' . $request->id); ?>" class="text-blue-600 hover:text-blue-900">Review</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            </div>
-        <?php else: ?>
-            <div class="bg-white rounded-lg shadow-sm p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">No requests found</h3>
-                <p class="mt-2 text-gray-600">Requests will appear here when users submit them</p>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="mt-4 text-sm text-gray-600">
+            Showing <?php echo count($requests); ?> of <?php echo $totalCount; ?> requests
+        </div>
     </div>
 </div>

@@ -340,6 +340,13 @@ class RequestChecksheet extends Controller
             });
         }
 
+        $stats = [
+            'pending' => RequestChecksheetModel::countByStatus('pending'),
+            'approved' => RequestChecksheetModel::countByStatus('approved'),
+            'rejected' => RequestChecksheetModel::countByStatus('rejected'),
+            'completed' => RequestChecksheetModel::countByStatus('completed'),
+        ];
+
         $this->setTitle('Request Checksheet Management');
         $this->view('admin/request_checksheet/admin_index', [
             'requests' => array_values($requests),
@@ -347,6 +354,7 @@ class RequestChecksheet extends Controller
             'status' => $status,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'stats' => $stats,
             'totalCount' => count($requests),
             'pendingCount' => RequestChecksheetModel::countByStatus('pending'),
             'approvedCount' => RequestChecksheetModel::countByStatus('approved'),

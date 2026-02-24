@@ -1,88 +1,152 @@
 <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Internal Memo Requests</h1>
-                <p class="text-gray-600 mt-2">View and manage your internal memo requests</p>
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Request Memo</h1>
+                    <p class="mt-2 text-gray-600">Manage your internal memo requests</p>
+                </div>
+                <a href="<?php echo url('request_memo/create'); ?>" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    New Request
+                </a>
             </div>
-            <a href="<?php echo url('/requests/memo/create'); ?>" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                New Request
-            </a>
         </div>
 
-        <!-- Flash Messages -->
-        <?php if (session('success')): ?>
-            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                <?php echo session('success'); ?>
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-100">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'pending')); ?></dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
-        <?php if (session('error')): ?>
-            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                <?php echo session('error'); ?>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'approved')); ?></dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-red-100">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Rejected</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'rejected')); ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'completed')); ?></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Search and Filter -->
-        <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <form method="GET" action="<?php echo url('/requests/memo'); ?>" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                    <input type="text" name="search" placeholder="Request number or content..." value="<?php echo htmlspecialchars($search ?? ''); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <form method="GET" class="space-y-4">
+                <div class="flex gap-4 flex-wrap">
+                    <div class="flex-1 min-w-xs">
+                        <input type="text" name="search" placeholder="Search by request number or content..." value="<?php echo htmlspecialchars($search ?? ''); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <select name="status" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                         <option value="">All Status</option>
-                        <option value="pending" <?php echo ($status === 'pending') ? 'selected' : ''; ?>>Pending</option>
-                        <option value="approved" <?php echo ($status === 'approved') ? 'selected' : ''; ?>>Approved</option>
-                        <option value="rejected" <?php echo ($status === 'rejected') ? 'selected' : ''; ?>>Rejected</option>
-                        <option value="completed" <?php echo ($status === 'completed') ? 'selected' : ''; ?>>Completed</option>
+                        <option value="pending" <?php echo ($status ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                        <option value="approved" <?php echo ($status ?? '') === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                        <option value="rejected" <?php echo ($status ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                        <option value="completed" <?php echo ($status ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                        <option value="cancelled" <?php echo ($status ?? '') === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                     </select>
                 </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium">
-                        Filter
-                    </button>
+
+                <div class="flex gap-4 flex-wrap items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                        <input type="date" name="start_date" value="<?php echo htmlspecialchars($startDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                        <input type="date" name="end_date" value="<?php echo htmlspecialchars($endDate ?? ''); ?>" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Filter</button>
+                    <a href="<?php echo url('request_memo'); ?>" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Reset</a>
                 </div>
             </form>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-4 rounded-lg shadow">
-                <div class="text-sm text-gray-600">Total Requests</div>
-                <div class="text-2xl font-bold text-gray-900"><?php echo $totalCount; ?></div>
-            </div>
-        </div>
-
         <!-- Requests Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
             <?php if ($requests): ?>
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Request #</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Content Preview</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Conveyor</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Shift</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request No</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conveyor</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shift</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($requests as $req): ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="font-medium text-gray-900"><?php echo $req->request_number; ?></span>
+                                    <span class="font-mono text-sm font-medium text-gray-900"><?php echo $req->request_number; ?></span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-600 max-w-xs truncate">
-                                        <?php echo substr($req->memo_content, 0, 100); ?>...
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    <div class="max-w-xs truncate">
+                                        <?php echo substr($req->memo_content ?? '', 0, 50); ?>...
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
@@ -92,44 +156,52 @@
                                     <?php echo $req->shift ?? '-'; ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
-                                        <?php if ($req->status === 'pending'): ?>
-                                            bg-yellow-100 text-yellow-800
-                                        <?php elseif ($req->status === 'approved'): ?>
-                                            bg-green-100 text-green-800
-                                        <?php elseif ($req->status === 'rejected'): ?>
-                                            bg-red-100 text-red-800
-                                        <?php else: ?>
-                                            bg-blue-100 text-blue-800
-                                        <?php endif; ?>
-                                    ">
-                                        <?php echo ucfirst($req->status); ?>
+                                    <?php
+                                    $statusColors = [
+                                        'pending' => 'bg-yellow-100 text-yellow-800',
+                                        'approved' => 'bg-green-100 text-green-800',
+                                        'rejected' => 'bg-red-100 text-red-800',
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800',
+                                    ];
+                                    $statusLabels = [
+                                        'pending' => 'Pending',
+                                        'approved' => 'Approved',
+                                        'rejected' => 'Rejected',
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled',
+                                    ];
+                                    $color = $statusColors[$req->status] ?? 'bg-gray-100 text-gray-800';
+                                    $label = $statusLabels[$req->status] ?? ucfirst($req->status);
+                                    ?>
+                                    <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $color; ?>">
+                                        <?php echo $label; ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    <?php echo date('M d, Y', strtotime($req->created_at)); ?>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <?php echo date('d/m/Y', strtotime($req->created_at)); ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="<?php echo url("/requests/memo/show/{$req->id}"); ?>" class="text-blue-600 hover:text-blue-900 font-medium">View</a>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="<?php echo url('request_memo/show/' . $req->id); ?>" class="text-blue-600 hover:text-blue-900">View</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <div class="text-center py-12">
+                <div class="p-12 text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
-                    <h3 class="mt-2 text-lg font-medium text-gray-900">No requests found</h3>
-                    <p class="mt-1 text-gray-600">Get started by creating a new internal memo request.</p>
-                    <div class="mt-6">
-                        <a href="<?php echo url('/requests/memo/create'); ?>" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                            Create Request
-                        </a>
-                    </div>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No requests</h3>
+                    <p class="mt-1 text-sm text-gray-500">Get started by creating a new request.</p>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <!-- Pagination Info -->
+        <div class="mt-4 text-sm text-gray-600">
+            Showing <?php echo count($requests); ?> of <?php echo $totalCount; ?> requests
         </div>
     </div>
 </div>
