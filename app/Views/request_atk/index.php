@@ -30,7 +30,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => empty($r->approved_at) && $r->status !== 'rejected' && $r->status !== 'completed')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'pending')); ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => !empty($r->approved_at))); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => !empty($r->approved_at) || $r->status === 'approved')); ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -104,6 +104,7 @@
                         <option value="approved" <?php echo $statusFilter === 'approved' ? 'selected' : ''; ?>>Approved</option>
                         <option value="rejected" <?php echo $statusFilter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
                         <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                        <option value="cancelled" <?php echo $statusFilter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                     </select>
                 </div>
                 
@@ -168,15 +169,17 @@
                                     <?php
                                     $statusColors = [
                                         'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'accepted' => 'bg-blue-100 text-blue-800',
+                                        'approved' => 'bg-green-100 text-green-800',
                                         'rejected' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-green-100 text-green-800',
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800',
                                     ];
                                     $statusLabels = [
                                         'pending' => 'Pending',
-                                        'accepted' => 'Accepted',
+                                        'approved' => 'Approved',
                                         'rejected' => 'Rejected',
-                                        'completed' => 'Closed',
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled',
                                     ];
                                     $color = $statusColors[$request->status] ?? 'bg-gray-100 text-gray-800';
                                     $label = $statusLabels[$request->status] ?? ucfirst($request->status);

@@ -452,8 +452,8 @@ class RequestATK extends Controller
         $validNextStatuses = [];
         
         if ($currentStatus === 'pending') {
-            $validNextStatuses = ['accepted', 'rejected'];
-        } elseif ($currentStatus === 'accepted') {
+            $validNextStatuses = ['approved', 'rejected'];
+        } elseif ($currentStatus === 'approved') {
             $validNextStatuses = ['completed', 'rejected'];
         }
 

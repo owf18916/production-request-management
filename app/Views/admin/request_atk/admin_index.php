@@ -99,6 +99,7 @@
                             <option value="approved" <?php echo $statusFilter === 'approved' ? 'selected' : ''; ?>>Approved</option>
                             <option value="rejected" <?php echo $statusFilter === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
                             <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                            <option value="cancelled" <?php echo $statusFilter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                         </select>
                     </div>
                     <div>
@@ -176,15 +177,17 @@
                                     <?php
                                     $statusColors = [
                                         'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'accepted' => 'bg-blue-100 text-blue-800',
+                                        'approved' => 'bg-green-100 text-green-800',
                                         'rejected' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-green-100 text-green-800',
+                                        'completed' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800',
                                     ];
                                     $statusLabels = [
                                         'pending' => 'Pending',
-                                        'accepted' => 'Accepted',
+                                        'approved' => 'Approved',
                                         'rejected' => 'Rejected',
-                                        'completed' => 'Closed',
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled',
                                     ];
                                     $color = $statusColors[$request->status] ?? 'bg-gray-100 text-gray-800';
                                     $label = $statusLabels[$request->status] ?? ucfirst($request->status);
