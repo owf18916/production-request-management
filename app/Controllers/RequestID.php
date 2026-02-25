@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controller;
 use App\Session;
 use App\Security;
+use App\Database;
 use App\Models\RequestID as RequestIDModel;
 use App\Models\Conveyor as ConveyorModel;
 use App\Models\User as UserModel;
@@ -219,6 +220,30 @@ class RequestID extends Controller
                 $allSuccess = false;
                 $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
                 error_log("RequestID store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
+            } else {
+                // Get the last inserted ID
+                $requestId = (int) Database::lastId();
+                error_log("RequestID store - Created request_id " . $requestId . " for request_number: " . $requestNumber);
+                
+                // Prepare details array - include all fields except id_type and notes (which are in main table)
+                $details = [];
+                foreach ($item as $key => $value) {
+                    // Skip fields that are stored in main request_id table
+                    if ($key === 'id_type' || $key === 'notes') {
+                        continue;
+                    }
+                    // Save all other fields to details table
+                    $details[$key] = $value ?? '';
+                }
+                
+                // Save details - even if empty, we want to record what was submitted
+                error_log("RequestID store - Saving details for request_id " . $requestId . ": " . json_encode($details));
+                $detailsSuccess = RequestIDModel::saveDetails($requestId, $details);
+                if (!$detailsSuccess) {
+                    error_log("RequestID store - Failed to save details for request_id " . $requestId);
+                } else {
+                    error_log("RequestID store - Successfully saved " . count($details) . " details for request_id " . $requestId);
+                }
             }
         }
 

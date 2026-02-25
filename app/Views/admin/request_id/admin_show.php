@@ -94,28 +94,58 @@
 
                 <!-- Dynamic Fields -->
                 <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Details</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Item Details</h2>
                     
-                    <?php if (!empty($details)): ?>
-                        <div class="space-y-3">
-                            <?php foreach ($details as $fieldName => $fieldValue): ?>
-                                <?php 
-                                    $fieldConfig = $idTypeFields[$request->id_type][$fieldName] ?? null;
-                                    $fieldLabel = $fieldConfig['label'] ?? ucfirst(str_replace('_', ' ', $fieldName));
-                                ?>
-                                <div class="pb-3 border-b border-gray-200 last:border-0">
-                                    <label class="text-sm font-medium text-gray-600"><?php echo htmlspecialchars($fieldLabel); ?></label>
-                                    <p class="text-gray-900 mt-1">
-                                        <?php 
-                                            if (is_string($fieldValue) && strlen($fieldValue) > 100) {
-                                                echo '<pre class="bg-gray-50 p-3 rounded text-sm">' . htmlspecialchars($fieldValue) . '</pre>';
-                                            } else {
-                                                echo htmlspecialchars($fieldValue);
-                                            }
-                                        ?>
-                                    </p>
-                                </div>
-                            <?php endforeach; ?>
+                    <?php 
+                        // Filter out empty values
+                        $filteredDetails = [];
+                        foreach ($details as $fieldName => $fieldValue) {
+                            if (!empty($fieldValue) || $fieldValue === '0') {
+                                $filteredDetails[$fieldName] = $fieldValue;
+                            }
+                        }
+                    ?>
+                    
+                    <?php if (!empty($filteredDetails)): ?>
+                        <div class="border-2 border-gray-200 rounded-lg p-4">
+                            <!-- Item Header -->
+                            <div class="mb-4 pb-4 border-b-2 border-gray-200">
+                                <h3 class="text-md font-semibold text-gray-800">Item #1</h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <?php 
+                                        $typeLabels = [
+                                            'id_punggung' => 'ID Punggung',
+                                            'pin_4m' => 'PIN 4M',
+                                            'id_kaki' => 'ID Kaki',
+                                            'job_psd' => 'Job PSD',
+                                            'id_other' => 'ID Other'
+                                        ];
+                                        echo htmlspecialchars($typeLabels[$request->id_type] ?? $request->id_type);
+                                    ?>
+                                </p>
+                            </div>
+                            
+                            <!-- Item Fields -->
+                            <div class="space-y-3">
+                                <?php foreach ($filteredDetails as $fieldName => $fieldValue): ?>
+                                    <?php 
+                                        $fieldConfig = $idTypeFields[$request->id_type][$fieldName] ?? null;
+                                        $fieldLabel = $fieldConfig['label'] ?? ucfirst(str_replace('_', ' ', $fieldName));
+                                    ?>
+                                    <div class="pb-3 border-b border-gray-200 last:border-0">
+                                        <label class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fieldLabel); ?></label>
+                                        <p class="text-gray-900 mt-1">
+                                            <?php 
+                                                if (is_string($fieldValue) && strlen($fieldValue) > 100) {
+                                                    echo '<pre class="bg-gray-50 p-3 rounded text-sm">' . htmlspecialchars($fieldValue) . '</pre>';
+                                                } else {
+                                                    echo htmlspecialchars($fieldValue);
+                                                }
+                                            ?>
+                                        </p>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     <?php else: ?>
                         <p class="text-gray-600">No details recorded</p>

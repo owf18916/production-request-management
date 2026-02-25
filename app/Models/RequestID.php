@@ -187,16 +187,22 @@ class RequestID extends Model
             // Delete existing details
             $sql = "DELETE FROM request_id_details WHERE request_id_id = ?";
             Database::query($sql, [$requestId]);
+            error_log("RequestID::saveDetails - Deleted existing details for request_id " . $requestId);
             
             // Insert new details
-            foreach ($details as $fieldName => $fieldValue) {
-                $sql = "INSERT INTO request_id_details (request_id_id, detail_key, detail_value)
-                        VALUES (?, ?, ?)";
-                Database::query($sql, [$requestId, $fieldName, $fieldValue]);
+            if (!empty($details)) {
+                foreach ($details as $fieldName => $fieldValue) {
+                    $sql = "INSERT INTO request_id_details (request_id_id, detail_key, detail_value)
+                            VALUES (?, ?, ?)";
+                    Database::query($sql, [$requestId, $fieldName, $fieldValue]);
+                    error_log("RequestID::saveDetails - Inserted detail: request_id=" . $requestId . ", field=" . $fieldName . ", value=" . $fieldValue);
+                }
             }
             
+            error_log("RequestID::saveDetails - Success for request_id " . $requestId);
             return true;
         } catch (\Exception $e) {
+            error_log("RequestID::saveDetails - Exception for request_id " . $requestId . ": " . $e->getMessage());
             return false;
         }
     }
