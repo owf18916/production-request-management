@@ -82,6 +82,10 @@
                                 <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
                                 Master ATK
                             </a>
+                            <a href="<?php echo url('/admin/atk-stock'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                                <span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>
+                                Stock Management
+                            </a>
                             <a href="<?php echo url('/admin/master/checksheet'); ?>" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors">
                                 <span class="w-2 h-2 bg-purple-400 rounded-full mr-3"></span>
                                 Master Checksheet

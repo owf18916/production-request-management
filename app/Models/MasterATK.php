@@ -171,4 +171,13 @@ class MasterATK extends Model
         $result = Database::row($sql);
         return (int)$result->total;
     }
+
+    /**
+     * Find by Kode Barang
+     */
+    public static function findByKodeBarang(string $kodeBarang): ?object
+    {
+        $sql = "SELECT * FROM master_atk WHERE kode_barang = ?";
+        return Database::row($sql, [$kodeBarang]);
+    }
 }

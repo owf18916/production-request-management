@@ -6,6 +6,7 @@ use App\Controller;
 use App\Session;
 use App\Security;
 use App\Models\MasterATK as MasterATKModel;
+use App\Models\ATKStock as ATKStockModel;
 
 /**
  * MasterATK Controller
@@ -100,10 +101,16 @@ class MasterATK extends Controller
 
         if (!$created) {
             Session::flash('error', 'Failed to create ATK. Please try again.');
-            $this->redirect(url('/admin/master/atk/create'));
+            $this->redirect(url('/admin/master/atk'));
         }
 
-        Session::flash('success', 'ATK created successfully');
+        // Initialize stock for new ATK
+        $newAtk = MasterATKModel::findByKodeBarang($kodeBarang);
+        if ($newAtk) {
+            ATKStockModel::initializeStock($newAtk->id, $userId);
+        }
+
+        Session::flash('success', 'ATK created successfully with stock initialized');
         $this->redirect(url('/admin/master/atk'));
     }
 

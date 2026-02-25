@@ -73,6 +73,7 @@ $router->get('/requests/atk/create', 'RequestATK@create', ['middleware' => 'Auth
 $router->post('/requests/atk/store', 'RequestATK@store', ['middleware' => 'Authenticate']);
 $router->get('/requests/atk/show/{id}', 'RequestATK@show', ['middleware' => 'Authenticate']);
 $router->post('/requests/atk/cancel/{id}', 'RequestATK@cancel', ['middleware' => 'Authenticate']);
+$router->post('/requests/atk/complete/{id}', 'RequestATK@completeRequest', ['middleware' => 'Authenticate']);
 $router->get('/requests/atk/export', 'RequestATK@export', ['middleware' => 'Authenticate']);
 
 // Request ATK routes (Admin) - WITH admin middleware
@@ -80,6 +81,14 @@ $router->get('/admin/requests/atk', 'RequestATK@adminIndex', ['middleware' => ['
 $router->get('/admin/requests/atk/{id}', 'RequestATK@adminShow', ['middleware' => ['Authenticate', 'Admin']]);
 $router->post('/admin/requests/atk/{id}/update-status', 'RequestATK@updateStatus', ['middleware' => ['Authenticate', 'Admin']]);
 $router->get('/admin/requests/atk/export', 'RequestATK@export', ['middleware' => ['Authenticate', 'Admin']]);
+
+// ATK Stock Management routes - WITH admin middleware
+$router->get('/admin/atk-stock', 'ATKStockManagement@index', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/atk-stock/add-incoming/{id}', 'ATKStockManagement@addIncoming', ['middleware' => ['Authenticate', 'Admin']]);
+$router->post('/admin/atk-stock/store-incoming/{id}', 'ATKStockManagement@storeIncoming', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/atk-stock/adjustment/{id}', 'ATKStockManagement@showAdjustmentForm', ['middleware' => ['Authenticate', 'Admin']]);
+$router->post('/admin/atk-stock/store-adjustment/{id}', 'ATKStockManagement@storeAdjustment', ['middleware' => ['Authenticate', 'Admin']]);
+$router->get('/admin/atk-stock/transaction-history/{id}', 'ATKStockManagement@transactionHistory', ['middleware' => ['Authenticate', 'Admin']]);
 
 // Request ID routes (PIC) - WITH authentication middleware - MUST BE BEFORE /request-id/{id}
 $router->get('/request-id', 'RequestID@index', ['middleware' => 'Authenticate']);

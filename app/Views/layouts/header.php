@@ -59,6 +59,7 @@
                             </button>
                             <div class="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                 <a href="<?php echo url('/admin/master/atk'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Master ATK</a>
+                                <a href="<?php echo url('/admin/atk-stock'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Stock Management</a>
                                 <a href="<?php echo url('/admin/master/checksheet'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Master Checksheet</a>
                                 <a href="<?php echo url('/admin/master/conveyor'); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">Manage Conveyors</a>
                             </div>
@@ -136,6 +137,7 @@
                 <?php if (session('user_role') === 'admin'): ?>
                     <a href="<?php echo url('/admin/requests/atk'); ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">ATK Requests</a>
                     <a href="<?php echo url('/admin/master/atk'); ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Master Data</a>
+                    <a href="<?php echo url('/admin/atk-stock'); ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Stock Management</a>
                     <a href="<?php echo url('/admin/users'); ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Manage Users</a>
                 <?php else: ?>
                     <a href="<?php echo url('/requests/atk'); ?>" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">My ATK Requests</a>

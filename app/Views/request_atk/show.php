@@ -144,9 +144,22 @@
                     <?php endif; ?>
                 </div>
 
-                <!-- Cancel Request Button -->
-                <?php if ($request->status === 'pending'): ?>
-                    <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <!-- Action Buttons -->
+                <?php if ($request->status === 'pending' || $request->status === 'approved'): ?>
+                    <div class="bg-white rounded-lg shadow p-6 mt-6 space-y-3">
+                        <?php if ($request->status === 'approved'): ?>
+                            <!-- Complete Request Button -->
+                            <button 
+                                type="button"
+                                onclick="openCompleteConfirmation()"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                            >
+                                Confirm Goods Received (Complete)
+                            </button>
+                            <p class="text-xs text-gray-500 text-center">Click when you receive the goods</p>
+                        <?php endif; ?>
+
+                        <!-- Cancel Request Button -->
                         <button 
                             type="button"
                             onclick="openCancelConfirmation()"
@@ -154,10 +167,29 @@
                         >
                             Cancel Request
                         </button>
-                        <p class="text-xs text-gray-500 mt-2">This will cancel your request</p>
+                        <p class="text-xs text-gray-500 text-center">This will cancel your request</p>
                     </div>
 
                     <script>
+                    function openCompleteConfirmation() {
+                        openConfirmationModal(
+                            'Complete Request',
+                            'Are you sure you want to mark this request as completed? Confirm that you have received the goods.',
+                            submitCompleteForm,
+                            'Yes, Confirm Receipt',
+                            'green'
+                        );
+                    }
+
+                    function submitCompleteForm() {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '<?php echo url("requests/atk/complete/{$request->id}"); ?>';
+                        form.innerHTML = '<input type="hidden" name="_csrf_token" value="<?php echo session('_csrf_token') ?? ''; ?>">';
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+
                     function openCancelConfirmation() {
                         openConfirmationModal(
                             'Cancel Request',

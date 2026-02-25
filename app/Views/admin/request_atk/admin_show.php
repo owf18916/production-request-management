@@ -26,15 +26,17 @@
                             <?php
                             $statusColors = [
                                 'pending' => 'bg-yellow-100 text-yellow-800',
-                                'accepted' => 'bg-blue-100 text-blue-800',
+                                'approved' => 'bg-blue-100 text-blue-800',
                                 'rejected' => 'bg-red-100 text-red-800',
                                 'completed' => 'bg-green-100 text-green-800',
+                                'cancelled' => 'bg-gray-100 text-gray-800',
                             ];
                             $statusLabels = [
                                 'pending' => 'Pending',
-                                'accepted' => 'Accepted',
+                                'approved' => 'Approved',
                                 'rejected' => 'Rejected',
-                                'completed' => 'Closed',
+                                'completed' => 'Completed',
+                                'cancelled' => 'Cancelled',
                             ];
                             $color = $statusColors[$request->status] ?? 'bg-gray-100 text-gray-800';
                             $label = $statusLabels[$request->status] ?? ucfirst($request->status);
@@ -98,7 +100,7 @@
             <!-- Right Column - Status Update Form & Timeline -->
             <div class="space-y-6">
                 <!-- Status Update Form -->
-                <?php if ($request->status === 'pending' || $request->status === 'accepted'): ?>
+                <?php if ($request->status === 'pending'): ?>
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Update Status</h3>
 
@@ -109,19 +111,14 @@
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">New Status</label>
                                 <?php if (isset($errors['status'])): ?>
-                                    <div class="p-2 mb-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                                    <div class="p-3 mb-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                                         <?php echo $errors['status']; ?>
                                     </div>
                                 <?php endif; ?>
                                 <select name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Select Status</option>
-                                    <?php if ($request->status === 'pending'): ?>
-                                        <option value="accepted">Accept</option>
-                                        <option value="rejected">Reject</option>
-                                    <?php elseif ($request->status === 'accepted'): ?>
-                                        <option value="completed">Close</option>
-                                        <option value="rejected">Reject</option>
-                                    <?php endif; ?>
+                                    <option value="approved">Approve (will reduce stock)</option>
+                                    <option value="rejected">Reject</option>
                                 </select>
                             </div>
 
@@ -156,7 +153,13 @@
                 <?php else: ?>
                     <div class="bg-gray-50 rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Status</h3>
-                        <p class="text-gray-600">This request has been <?php echo ($request->status === 'completed' ? 'closed' : $request->status); ?>. No further changes can be made.</p>
+                        <p class="text-gray-600">This request is <?php echo ucfirst($request->status); ?>. 
+                        <?php if ($request->status === 'approved'): ?>
+                            User dapat mengkonfirmasi penerimaan barang dan mengubah status menjadi Completed.
+                        <?php elseif ($request->status === 'completed'): ?>
+                            Request telah selesai.
+                        <?php endif; ?>
+                        No further changes can be made by admin.</p>
                     </div>
                 <?php endif; ?>
 
@@ -173,9 +176,10 @@
                                             <div class="w-3 h-3 rounded-full 
                                                 <?php 
                                                     if ($item->status === 'pending') echo 'bg-yellow-400';
-                                                    elseif ($item->status === 'accepted') echo 'bg-blue-400';
+                                                    elseif ($item->status === 'approved') echo 'bg-blue-400';
                                                     elseif ($item->status === 'rejected') echo 'bg-red-400';
                                                     elseif ($item->status === 'completed') echo 'bg-green-400';
+                                                    elseif ($item->status === 'cancelled') echo 'bg-gray-400';
                                                 ?>
                                             "></div>
                                             <div class="w-0.5 h-8 bg-gray-200 mt-1"></div>
@@ -183,7 +187,13 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900">
                                                 <?php 
-                                                    $statusLabels = ['pending' => 'Pending', 'accepted' => 'Accepted', 'rejected' => 'Rejected', 'completed' => 'Closed'];
+                                                    $statusLabels = [
+                                                        'pending' => 'Pending',
+                                                        'approved' => 'Approved',
+                                                        'rejected' => 'Rejected',
+                                                        'completed' => 'Completed',
+                                                        'cancelled' => 'Cancelled'
+                                                    ];
                                                     echo $statusLabels[$item->status] ?? ucfirst($item->status); 
                                                 ?>
                                             </p>

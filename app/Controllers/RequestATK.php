@@ -7,6 +7,7 @@ use App\Session;
 use App\Security;
 use App\Models\RequestATK as RequestATKModel;
 use App\Models\MasterATK as MasterATKModel;
+use App\Models\ATKStock as ATKStockModel;
 use App\Models\Conveyor as ConveyorModel;
 use App\Models\User as UserModel;
 
@@ -312,17 +313,32 @@ class RequestATK extends Controller
             $this->redirect(url('requests/atk'), 'error', 'Unauthorized access');
         }
 
-        // Check if request can be cancelled (only pending can be cancelled)
-        if ($request->status === 'approved') {
-            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Cannot cancel an approved request');
-        }
-
+        // Check if request can be cancelled (pending and approved can be cancelled)
         if ($request->status === 'completed') {
             $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Cannot cancel a completed request');
         }
 
+        if ($request->status === 'rejected') {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Cannot cancel a rejected request');
+        }
+
         if ($request->status === 'cancelled') {
             $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Request is already cancelled');
+        }
+
+        // If cancelling from approved status, restore stock
+        if ($request->status === 'approved') {
+            $restoreSuccess = ATKStockModel::restoreStock(
+                $request->atk_id,
+                $request->qty,
+                $id,
+                $userId,
+                'Stock restored from cancelled request'
+            );
+
+            if (!$restoreSuccess) {
+                $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Failed to restore stock');
+            }
         }
 
         // Update status to cancelled with cancellation note
@@ -337,6 +353,48 @@ class RequestATK extends Controller
             $this->redirect(url("requests/atk/show/{$id}"), 'success', 'Request cancelled successfully');
         } else {
             $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Failed to cancel request');
+        }
+    }
+
+    /**
+     * Complete Request - User confirms receipt (Change to Completed)
+     */
+    public function completeRequest(int $id): void
+    {
+        $userId = Session::get('user_id');
+        
+        if (!$userId) {
+            $this->redirect(url('login'));
+        }
+
+        $request = RequestATKModel::findById($id);
+
+        if (!$request) {
+            $this->redirect(url('requests/atk'), 'error', 'Request not found');
+        }
+
+        // Check authorization - PIC can only complete own requests
+        if ($request->requested_by != $userId) {
+            $this->redirect(url('requests/atk'), 'error', 'Unauthorized access');
+        }
+
+        // Check if request can be completed (only approved can be completed)
+        if ($request->status !== 'approved') {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Only approved requests can be completed');
+        }
+
+        // Update status to completed
+        $success = RequestATKModel::updateStatus(
+            $id,
+            'completed',
+            $userId,
+            'Completed by requester - goods received'
+        );
+
+        if ($success) {
+            $this->redirect(url("requests/atk/show/{$id}"), 'success', 'Request completed successfully - goods confirmed');
+        } else {
+            $this->redirect(url("requests/atk/show/{$id}"), 'error', 'Failed to complete request');
         }
     }
 
@@ -448,13 +506,12 @@ class RequestATK extends Controller
         $errors = [];
 
         // Validate status based on current status
+        // Admin can only: pending->approved or pending->rejected
         $currentStatus = $request->status;
         $validNextStatuses = [];
         
         if ($currentStatus === 'pending') {
             $validNextStatuses = ['approved', 'rejected'];
-        } elseif ($currentStatus === 'approved') {
-            $validNextStatuses = ['completed', 'rejected'];
         }
 
         if (!$status || !in_array($status, $validNextStatuses)) {
@@ -477,11 +534,52 @@ class RequestATK extends Controller
             return;
         }
 
+        // If approving, check and reduce stock
+        if ($status === 'approved') {
+            $stock = ATKStockModel::findByAtkId($request->atk_id);
+            
+            if (!$stock || $stock->ending_stock < $request->qty) {
+                $available = $stock ? $stock->ending_stock : 0;
+                $errors['status'] = "Qty tidak mencukupi, Stok di gudang hanya tersisa {$available}";
+                
+                $this->setTitle('Request ATK Detail - Admin');
+                $this->view('admin/request_atk/admin_show', [
+                    'request' => $request,
+                    'history' => RequestATKModel::getHistory($id),
+                    'errors' => $errors,
+                    'csrf_token' => Session::generateToken(),
+                ]);
+                return;
+            }
+
+            // Reduce stock
+            $reduceSuccess = ATKStockModel::reduceStock(
+                $request->atk_id,
+                $request->qty,
+                $id,
+                $userId,
+                'Stock reduced from approved request ATK'
+            );
+
+            if (!$reduceSuccess) {
+                $errors['status'] = 'Failed to process stock reduction';
+                $this->setTitle('Request ATK Detail - Admin');
+                $this->view('admin/request_atk/admin_show', [
+                    'request' => $request,
+                    'history' => RequestATKModel::getHistory($id),
+                    'errors' => $errors,
+                    'csrf_token' => Session::generateToken(),
+                ]);
+                return;
+            }
+        }
+
         // Update status
         $success = RequestATKModel::updateStatus($id, $status, $userId, $notes ?: null);
 
         if ($success) {
-            $this->redirect(url("admin/requests/atk/{$id}"), 'success', 'Request status updated successfully');
+            $statusMsg = $status === 'approved' ? 'Request approved and stock reduced' : 'Request rejected';
+            $this->redirect(url("admin/requests/atk/{$id}"), 'success', $statusMsg);
         } else {
             $this->redirect(url("admin/requests/atk/{$id}"), 'error', 'Failed to update request status');
         }
