@@ -200,7 +200,7 @@
                                     <?php echo date('d/m/Y', strtotime($request->created_at)); ?>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-xs font-medium">
-                                    <a href="<?php echo url('admin/request_checksheet/' . $request->id); ?>" class="text-blue-600 hover:text-blue-900">Review</a>
+                                    <a href="<?php echo url('admin/request_checksheet/show/' . $request->id); ?>" class="text-blue-600 hover:text-blue-900">Review</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -153,13 +153,13 @@
                 <?php else: ?>
                     <div class="bg-gray-50 rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Status</h3>
-                        <p class="text-gray-600">This request is <?php echo ucfirst($request->status); ?>. 
+                        <p class="text-gray-600">Request ini <?php echo ucfirst($request->status); ?>. 
                         <?php if ($request->status === 'approved'): ?>
                             User dapat mengkonfirmasi penerimaan barang dan mengubah status menjadi Completed.
                         <?php elseif ($request->status === 'completed'): ?>
                             Request telah selesai.
                         <?php endif; ?>
-                        No further changes can be made by admin.</p>
+                        Tidak ada perubahan yang bisa dilakukan lagi.</p>
                     </div>
                 <?php endif; ?>
 

@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Controller;
 use App\Session;
 use App\Security;
-use App\Database;
 use App\Models\RequestID as RequestIDModel;
 use App\Models\Conveyor as ConveyorModel;
 use App\Models\User as UserModel;
@@ -220,30 +219,6 @@ class RequestID extends Controller
                 $allSuccess = false;
                 $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
                 error_log("RequestID store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
-            } else {
-                // Get the last inserted ID
-                $requestId = (int) Database::lastId();
-                error_log("RequestID store - Created request_id " . $requestId . " for request_number: " . $requestNumber);
-                
-                // Prepare details array - include all fields except id_type and notes (which are in main table)
-                $details = [];
-                foreach ($item as $key => $value) {
-                    // Skip fields that are stored in main request_id table
-                    if ($key === 'id_type' || $key === 'notes') {
-                        continue;
-                    }
-                    // Save all other fields to details table
-                    $details[$key] = $value ?? '';
-                }
-                
-                // Save details - even if empty, we want to record what was submitted
-                error_log("RequestID store - Saving details for request_id " . $requestId . ": " . json_encode($details));
-                $detailsSuccess = RequestIDModel::saveDetails($requestId, $details);
-                if (!$detailsSuccess) {
-                    error_log("RequestID store - Failed to save details for request_id " . $requestId);
-                } else {
-                    error_log("RequestID store - Successfully saved " . count($details) . " details for request_id " . $requestId);
-                }
             }
         }
 
@@ -393,14 +368,6 @@ class RequestID extends Controller
             });
         }
 
-        // Generate stats array
-        $stats = [
-            'pending' => RequestIDModel::countByStatus('pending'),
-            'approved' => RequestIDModel::countByStatus('approved'),
-            'rejected' => RequestIDModel::countByStatus('rejected'),
-            'completed' => RequestIDModel::countByStatus('completed'),
-        ];
-
         $this->setTitle('All ID Requests');
         $this->view('admin/request_id/admin_index', [
             'requests' => $requests,
@@ -411,7 +378,6 @@ class RequestID extends Controller
             'endDate' => $endDate,
             'totalCount' => count($requests),
             'idTypes' => RequestIDModel::VALID_ID_TYPES,
-            'stats' => $stats,
         ]);
     }
 
@@ -544,7 +510,7 @@ class RequestID extends Controller
         });
 
         // Prepare data for export
-        $headers = ['Request Number', 'ID Type', 'Conveyor', 'Shift', 'Status', 'Requester', 'Created Date'];
+        $headers = ['Request Number', 'ID Type', 'Conveyor', 'Shift', 'Status', 'Requester', 'Created Date', 'Details'];
         $data = [];
 
         $typeLabels = [
@@ -566,6 +532,25 @@ class RequestID extends Controller
 
             $idTypeLabel = $typeLabels[$request->id_type] ?? $request->id_type;
 
+            // Get details for this request
+            $details = RequestIDModel::getDetails($request->id);
+            
+            // Filter details: only include non-null, non-empty values
+            $validDetails = array_filter($details, function($detail) {
+                return !empty($detail->detail_value) && $detail->detail_value !== '';
+            });
+
+            // Format all details into a single string with readable format
+            $detailsText = '';
+            if (!empty($validDetails)) {
+                $detailLines = [];
+                foreach ($validDetails as $detail) {
+                    $detailLines[] = $detail->detail_key . ': ' . $detail->detail_value;
+                }
+                $detailsText = implode("\n", $detailLines);
+            }
+
+            // Create single row per request with all details combined
             $data[] = [
                 $request->request_number,
                 $idTypeLabel,
@@ -574,6 +559,7 @@ class RequestID extends Controller
                 ucfirst($request->status),
                 $requesterName,
                 date('Y-m-d H:i:s', strtotime($request->created_at)),
+                $detailsText
             ];
         }
 
