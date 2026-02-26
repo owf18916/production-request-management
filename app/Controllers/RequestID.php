@@ -492,8 +492,18 @@ class RequestID extends Controller
             });
         }
 
+        // Calculate status counts for cards
+        $allRequests = array_values(RequestIDModel::getAll());
+        $statusCounts = [
+            'pending' => count(array_filter($allRequests, fn($r) => $r->status === 'pending')),
+            'approved' => count(array_filter($allRequests, fn($r) => $r->status === 'approved')),
+            'rejected' => count(array_filter($allRequests, fn($r) => $r->status === 'rejected')),
+            'completed' => count(array_filter($allRequests, fn($r) => $r->status === 'completed')),
+        ];
+
         $this->setTitle('All ID Requests');
         $this->view('admin/request_id/admin_index', [
+            'statusCounts' => $statusCounts,
             'requests' => $requests,
             'search' => $search,
             'idTypeFilter' => $idTypeFilter,

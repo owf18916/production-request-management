@@ -433,17 +433,24 @@ class RequestChecksheet extends Controller
             });
         }
 
+        // Calculate status counts for cards
+        $allRequests = array_values(RequestChecksheetModel::getAll());
+        $statusCounts = [
+            'pending' => count(array_filter($allRequests, fn($r) => $r->status === 'pending')),
+            'approved' => count(array_filter($allRequests, fn($r) => $r->status === 'approved')),
+            'rejected' => count(array_filter($allRequests, fn($r) => $r->status === 'rejected')),
+            'completed' => count(array_filter($allRequests, fn($r) => $r->status === 'completed')),
+        ];
+
         $this->setTitle('Request Checksheet Management');
         $this->view('admin/request_checksheet/admin_index', [
             'requests' => array_values($requests),
+            'statusCounts' => $statusCounts,
             'search' => $search,
             'status' => $status,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'totalCount' => count($requests),
-            'pendingCount' => RequestChecksheetModel::countByStatus('pending'),
-            'approvedCount' => RequestChecksheetModel::countByStatus('approved'),
-            'completedCount' => RequestChecksheetModel::countByStatus('completed'),
         ]);
     }
 
