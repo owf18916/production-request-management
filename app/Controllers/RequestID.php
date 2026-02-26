@@ -207,6 +207,10 @@ class RequestID extends Controller
             // Fall back to $_POST
             $input = $_POST;
         }
+        
+        // Debug logging
+        error_log('RequestID::store - Raw input: ' . $rawInput);
+        error_log('RequestID::store - Parsed input: ' . json_encode($input));
 
         $csrfToken = $input['_csrf_token'] ?? null;
         if (!Session::verifyToken($csrfToken)) {
@@ -220,6 +224,7 @@ class RequestID extends Controller
 
         // Get items from form (array)
         $items = $input['items'] ?? null;
+        error_log('RequestID::store - Items received: ' . json_encode($items));
 
         $errors = [];
 
@@ -231,6 +236,19 @@ class RequestID extends Controller
             foreach ($items as $index => $item) {
                 if (empty($item['id_type']) || !in_array($item['id_type'], RequestIDModel::VALID_ID_TYPES)) {
                     $errors["items.{$index}.id_type"] = "Item " . ($index + 1) . ": ID Type harus valid";
+                    continue;
+                }
+                
+                // Validate required fields for this id_type
+                $requiredFields = self::ID_TYPE_FIELDS[$item['id_type']] ?? [];
+                foreach ($requiredFields as $fieldName => $fieldConfig) {
+                    if ($fieldConfig['required'] ?? false) {
+                        $fieldValue = $item[$fieldName] ?? null;
+                        if (empty($fieldValue)) {
+                            $label = $fieldConfig['label'] ?? $fieldName;
+                            $errors["items.{$index}.{$fieldName}"] = "Item " . ($index + 1) . ": {$label} harus diisi";
+                        }
+                    }
                 }
             }
         }
@@ -240,9 +258,12 @@ class RequestID extends Controller
             if (!empty($rawInput) && $rawInput[0] === '{') {
                 header('Content-Type: application/json');
                 http_response_code(422);
+                // Convert errors object to details array for frontend
+                $details = array_values($errors);
                 echo json_encode([
                     'success' => false,
-                    'errors' => $errors
+                    'errors' => $errors,
+                    'details' => $details
                 ]);
                 return;
             }
@@ -297,6 +318,8 @@ class RequestID extends Controller
                         $details[$key] = $value;
                     }
                 }
+                
+                error_log("RequestID store - Item " . ($index + 1) . " prepared details: " . json_encode($details));
                 
                 // Save details to request_id_details table
                 if (!empty($details)) {

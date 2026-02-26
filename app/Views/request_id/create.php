@@ -7,7 +7,7 @@
         </div>
 
         <!-- Form -->
-        <div class="bg-white rounded-lg shadow p-8" x-data="requestForm()">
+        <div class="bg-white rounded-lg shadow p-8">
             <!-- Active Conveyor & Shift Info -->
             <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div class="flex items-center gap-3">
@@ -38,7 +38,7 @@
                     <!-- Add Item Button -->
                     <button 
                         type="button" 
-                        @click="addItem()"
+                        onclick="requestForm().addItem()"
                         class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                     >
                         + Add Item
@@ -78,21 +78,21 @@ function requestForm() {
             const index = itemsContainer.children.length;
             
             const itemHtml = `
-                <div class="item-row mb-6 p-4 border border-gray-200 rounded-lg" x-ref="itemRow_${index}">
+                <div class="item-row mb-6 p-4 border border-gray-200 rounded-lg">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="font-medium text-gray-900">Item <span class="item-number">${index + 1}</span></h3>
                         ${index > 0 ? `<button type="button" onclick="removeItemByElement(this)" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>` : ''}
                     </div>
 
                     <!-- ID Type Selection -->
-                    <div class="mb-4" x-data="{ type: '' }">
+                    <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             ID Type <span class="text-red-600">*</span>
                         </label>
                         
                         <select 
                             name="items[${index}][id_type]"
-                            @change="type = $event.target.value"
+                            onchange="handleTypeChange(this, ${index})"
                             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 mb-4"
                         >
                             <option value="">-- Select Type --</option>
@@ -104,15 +104,15 @@ function requestForm() {
                         </select>
 
                         <!-- ID Punggung Fields -->
-                        <div x-show="type === 'id_punggung'" class="space-y-3 p-3 bg-gray-50 rounded">
+                        <div id="fields_${index}_id_punggung" class="type-fields field-section space-y-3 p-3 bg-gray-50 rounded">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][job]" placeholder="Job"
+                                <input type="text" name="items[${index}][job]" placeholder="Job" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                <select name="items[${index}][keterangan]" required class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Select...</option>
                                     <option value="Asli">Asli</option>
                                     <option value="Perbaikan">Perbaikan</option>
@@ -120,36 +120,36 @@ function requestForm() {
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Warna <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][warna]" placeholder="Warna"
+                                <input type="text" name="items[${index}][warna]" placeholder="Warna" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
 
                         <!-- PIN 4M Fields -->
-                        <div x-show="type === 'pin_4m'" class="space-y-3 p-3 bg-gray-50 rounded">
+                        <div id="fields_${index}_pin_4m" class="type-fields field-section hidden space-y-3 p-3 bg-gray-50 rounded">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Nama <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][nama]" placeholder="Nama"
+                                <input type="text" name="items[${index}][nama]" placeholder="Nama" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">NIK <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][nik]" placeholder="NIK"
+                                <input type="text" name="items[${index}][nik]" placeholder="NIK" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Matrix Skill <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][matrix_skill]" placeholder="Matrix Skill"
+                                <input type="text" name="items[${index}][matrix_skill]" placeholder="Matrix Skill" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                <select name="items[${index}][keterangan]" required class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Select...</option>
                                     <option value="Bulat">Bulat</option>
                                     <option value="Kotak">Kotak</option>
@@ -157,26 +157,26 @@ function requestForm() {
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">PIN <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][pin]" placeholder="PIN"
+                                <input type="text" name="items[${index}][pin]" placeholder="PIN" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
 
                         <!-- ID Kaki Fields -->
-                        <div x-show="type === 'id_kaki'" class="space-y-3 p-3 bg-gray-50 rounded">
+                        <div id="fields_${index}_id_kaki" class="type-fields field-section hidden space-y-3 p-3 bg-gray-50 rounded">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Job <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][job]" placeholder="Job"
+                                <input type="text" name="items[${index}][job]" placeholder="Job" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-red-600">*</span></label>
-                                <select name="items[${index}][keterangan]" class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                <select name="items[${index}][keterangan]" required class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Select...</option>
                                     <option value="Bulat">Bulat</option>
                                     <option value="Kotak">Kotak</option>
@@ -184,35 +184,35 @@ function requestForm() {
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Qty <span class="text-red-600">*</span></label>
-                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1"
+                                <input type="number" name="items[${index}][qty]" placeholder="Quantity" min="1" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
 
                         <!-- Job PSD Fields -->
-                        <div x-show="type === 'job_psd'" class="space-y-3 p-3 bg-gray-50 rounded">
+                        <div id="fields_${index}_job_psd" class="type-fields field-section hidden space-y-3 p-3 bg-gray-50 rounded">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Remarks <span class="text-red-600">*</span></label>
-                                <textarea name="items[${index}][remarks]" placeholder="Remarks" rows="2"
+                                <textarea name="items[${index}][remarks]" placeholder="Remarks" rows="2" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
 
                         <!-- ID Other Fields -->
-                        <div x-show="type === 'id_other'" class="space-y-3 p-3 bg-gray-50 rounded">
+                        <div id="fields_${index}_id_other" class="type-fields field-section hidden space-y-3 p-3 bg-gray-50 rounded">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Nama ID <span class="text-red-600">*</span></label>
-                                <input type="text" name="items[${index}][nama_id]" placeholder="Nama ID"
+                                <input type="text" name="items[${index}][nama_id]" placeholder="Nama ID" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Panjang (cm) <span class="text-red-600">*</span></label>
-                                <input type="number" name="items[${index}][panjang]" placeholder="Panjang" min="0" step="0.1"
+                                <input type="number" name="items[${index}][panjang]" placeholder="Panjang" min="0" step="0.1" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Lebar (cm) <span class="text-red-600">*</span></label>
-                                <input type="number" name="items[${index}][lebar]" placeholder="Lebar" min="0" step="0.1"
+                                <input type="number" name="items[${index}][lebar]" placeholder="Lebar" min="0" step="0.1" required
                                     class="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                             </div>
                         </div>
@@ -232,6 +232,30 @@ function requestForm() {
             `;
             
             itemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+            
+            // Set initial display state for field sections
+            const newItem = itemsContainer.lastElementChild;
+            const fieldSections = newItem.querySelectorAll('.field-section');
+            fieldSections.forEach(section => {
+                // Extract type from section id: "fields_0_id_punggung" -> "id_punggung"
+                const sectionId = section.id;
+                const parts = sectionId.split('_');
+                const sectionType = parts.slice(2).join('_'); // Everything after "fields_0"
+                
+                // Show only id_punggung initially, hide others
+                if (sectionType === 'id_punggung') {
+                    section.style.display = 'block';
+                    section.classList.remove('hidden');
+                } else {
+                    section.style.display = 'none';
+                    section.classList.add('hidden');
+                    // Disable inputs in hidden sections so FormData doesn't collect them
+                    section.querySelectorAll('input, select, textarea').forEach(el => {
+                        el.disabled = true;
+                    });
+                }
+            });
+            
             updateItemNumbers();
         }
     }
@@ -240,6 +264,46 @@ function requestForm() {
 function removeItemByElement(btn) {
     btn.closest('.item-row').remove();
     updateItemNumbers();
+}
+
+function handleTypeChange(selectElement, itemIndex) {
+    const selectedType = selectElement.value;
+    const itemRow = selectElement.closest('.item-row');
+    
+    console.log(`handleTypeChange called: itemIndex=${itemIndex}, selectedType="${selectedType}"`);
+    
+    // Find all field sections in this item row
+    const fieldSections = itemRow.querySelectorAll('.field-section');
+    console.log(`Found ${fieldSections.length} field sections`);
+    
+    fieldSections.forEach(section => {
+        // Extract type from section id:  "fields_0_id_punggung" -> "id_punggung"
+        const sectionId = section.id;
+        const parts = sectionId.split('_');
+        const sectionType = parts.slice(2).join('_'); // Everything after "fields_0"
+        
+        console.log(`Section: ${sectionId} -> extracted type: "${sectionType}"`);
+        
+        if (selectedType && sectionType === selectedType) {
+            // SHOW this section
+            console.log(`  -> SHOWING ${sectionType}`);
+            section.style.display = 'block';
+            section.classList.remove('hidden');
+            // ENABLE all inputs in this section
+            section.querySelectorAll('input, select, textarea').forEach(el => {
+                el.disabled = false;
+            });
+        } else {
+            // HIDE this section
+            console.log(`  -> HIDING ${sectionType}`);
+            section.style.display = 'none';
+            section.classList.add('hidden');
+            // DISABLE all inputs in this section so FormData doesn't collect them
+            section.querySelectorAll('input, select, textarea').forEach(el => {
+                el.disabled = true;
+            });
+        }
+    });
 }
 
 function updateItemNumbers() {
@@ -370,9 +434,12 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Initialize on page load
+// Initialize form on page load
 document.addEventListener('DOMContentLoaded', () => {
     const form = requestForm();
     form.init();
+    
+    // Log for debugging
+    console.log('Form initialized');
 });
 </script>
