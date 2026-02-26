@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controller;
 use App\Session;
 use App\Security;
+use App\Pagination;
 use App\Models\MasterATK as MasterATKModel;
 use App\Models\ATKStock as ATKStockModel;
 
@@ -20,6 +21,8 @@ class MasterATK extends Controller
     public function index(): void
     {
         $search = $this->input('search');
+        $page = (int) ($this->input('page') ?? 1);
+        $perPage = 10;
         
         if ($search) {
             $atks = MasterATKModel::search($search);
@@ -27,11 +30,22 @@ class MasterATK extends Controller
             $atks = MasterATKModel::getAll();
         }
 
+        // Prepare atks array for pagination
+        $atks = array_values((array)$atks);
+        $totalAtks = count($atks);
+
+        // Create pagination object
+        $pagination = new Pagination($totalAtks, $perPage, $page);
+
+        // Paginate the results
+        $paginatedAtks = $pagination->paginate($atks);
+
         $this->setTitle('Master ATK Management');
         $this->view('admin/master/atk/index', [
-            'atks' => $atks,
+            'atks' => $paginatedAtks,
+            'pagination' => $pagination,
             'search' => $search,
-            'totalCount' => count($atks),
+            'totalCount' => $totalAtks,
         ]);
     }
 

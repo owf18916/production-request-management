@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controller;
 use App\Session;
 use App\Security;
+use App\Pagination;
 use App\Models\MasterChecksheet as MasterChecksheetModel;
 
 /**
@@ -19,6 +20,8 @@ class MasterChecksheet extends Controller
     public function index(): void
     {
         $search = $this->input('search');
+        $page = (int) ($this->input('page') ?? 1);
+        $perPage = 10;
         
         if ($search) {
             $checksheets = MasterChecksheetModel::search($search);
@@ -26,11 +29,22 @@ class MasterChecksheet extends Controller
             $checksheets = MasterChecksheetModel::getAll();
         }
 
+        // Prepare checksheets array for pagination
+        $checksheets = array_values((array)$checksheets);
+        $totalChecksheets = count($checksheets);
+
+        // Create pagination object
+        $pagination = new Pagination($totalChecksheets, $perPage, $page);
+
+        // Paginate the results
+        $paginatedChecksheets = $pagination->paginate($checksheets);
+
         $this->setTitle('Master Checksheet Management');
         $this->view('admin/master/checksheet/index', [
-            'checksheets' => $checksheets,
+            'checksheets' => $paginatedChecksheets,
+            'pagination' => $pagination,
             'search' => $search,
-            'totalCount' => count($checksheets),
+            'totalCount' => $totalChecksheets,
         ]);
     }
 

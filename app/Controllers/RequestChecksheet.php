@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controller;
 use App\Session;
 use App\Security;
+use App\Pagination;
 use App\Models\RequestChecksheet as RequestChecksheetModel;
 use App\Models\MasterChecksheet;
 use App\Models\Conveyor as ConveyorModel;
@@ -22,8 +23,19 @@ class RequestChecksheet extends Controller
         $status = $this->input('status');
         $startDate = $this->input('start_date');
         $endDate = $this->input('end_date');
+        $page = (int) ($this->input('page') ?? 1);
+        $perPage = 10;
         
         $requests = RequestChecksheetModel::getByUser($userId);
+
+        // Calculate status counts BEFORE applying filters
+        $allRequests = array_values($requests);
+        $statusCounts = [
+            'pending' => count(array_filter($allRequests, fn($r) => $r->status === 'pending')),
+            'approved' => count(array_filter($allRequests, fn($r) => $r->status === 'approved')),
+            'rejected' => count(array_filter($allRequests, fn($r) => $r->status === 'rejected')),
+            'completed' => count(array_filter($allRequests, fn($r) => $r->status === 'completed')),
+        ];
 
         // Filter by status if provided
         if ($status && $status !== '') {
@@ -49,14 +61,26 @@ class RequestChecksheet extends Controller
             });
         }
 
+        // Prepare requests array for pagination
+        $requests = array_values($requests);
+        $totalRequests = count($requests);
+
+        // Create pagination object
+        $pagination = new Pagination($totalRequests, $perPage, $page);
+
+        // Paginate the results
+        $paginatedRequests = $pagination->paginate($requests);
+
         $this->setTitle('My Requests - Checksheet');
         $this->view('request_checksheet/index', [
-            'requests' => array_values($requests),
+            'requests' => $paginatedRequests,
+            'pagination' => $pagination,
+            'statusCounts' => $statusCounts,
             'search' => $search,
             'status' => $status,
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'totalCount' => count($requests),
+            'totalCount' => $totalRequests,
         ]);
     }
 

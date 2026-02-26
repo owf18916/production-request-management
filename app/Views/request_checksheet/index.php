@@ -30,7 +30,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'pending')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $statusCounts['pending'] ?? 0; ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'approved')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $statusCounts['approved'] ?? 0; ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Rejected</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'rejected')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $statusCounts['rejected'] ?? 0; ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
-                            <dd class="text-lg font-medium text-gray-900"><?php echo count(array_filter($requests, fn($r) => $r->status === 'completed')); ?></dd>
+                            <dd class="text-lg font-medium text-gray-900"><?php echo $statusCounts['completed'] ?? 0; ?></dd>
                         </dl>
                     </div>
                 </div>
@@ -202,8 +202,83 @@
         </div>
 
         <!-- Pagination Info -->
-        <div class="mt-4 text-sm text-gray-600">
-            Showing <?php echo count($requests); ?> of <?php echo $totalCount; ?> requests
+        <div class="mt-6 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="text-sm text-gray-700">
+                <span class="font-medium">
+                    Showing <?php echo $pagination->getStartItem(); ?> to <?php echo $pagination->getEndItem(); ?> of <?php echo $totalCount; ?> results
+                </span>
+            </div>
+            
+            <!-- Pagination Navigation -->
+            <?php if ($pagination->getTotalPages() > 1): ?>
+            <nav class="mt-4 md:mt-0 flex items-center justify-center space-x-2">
+                <!-- Previous Button -->
+                <?php if ($pagination->hasPreviousPage()): ?>
+                    <a href="<?php echo url('request_checksheet?page=' . $pagination->getPreviousPage() . '&search=' . urlencode($search ?? '') . '&status=' . urlencode($status ?? '') . '&start_date=' . urlencode($startDate ?? '') . '&end_date=' . urlencode($endDate ?? '')); ?>" 
+                       class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        ← Previous
+                    </a>
+                <?php else: ?>
+                    <span class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                        ← Previous
+                    </span>
+                <?php endif; ?>
+
+                <!-- Page Numbers -->
+                <div class="flex items-center space-x-1">
+                    <?php 
+                    $pageRange = $pagination->getPageRange(5);
+                    $currentPage = $pagination->getCurrentPage();
+                    
+                    // Show first page if not in range
+                    if ($pageRange[0] > 1): ?>
+                        <a href="<?php echo url('request_checksheet?page=1&search=' . urlencode($search ?? '') . '&status=' . urlencode($status ?? '') . '&start_date=' . urlencode($startDate ?? '') . '&end_date=' . urlencode($endDate ?? '')); ?>" 
+                           class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            1
+                        </a>
+                        <?php if ($pageRange[0] > 2): ?>
+                            <span class="px-2 py-2 text-gray-700">...</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php foreach ($pageRange as $page): ?>
+                        <?php if ($page === $currentPage): ?>
+                            <span class="px-3 py-2 border border-blue-500 rounded-md text-sm font-medium text-white bg-blue-600">
+                                <?php echo $page; ?>
+                            </span>
+                        <?php else: ?>
+                            <a href="<?php echo url('request_checksheet?page=' . $page . '&search=' . urlencode($search ?? '') . '&status=' . urlencode($status ?? '') . '&start_date=' . urlencode($startDate ?? '') . '&end_date=' . urlencode($endDate ?? '')); ?>" 
+                               class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                <?php echo $page; ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                    <!-- Show last page if not in range -->
+                    <?php if ($pageRange[count($pageRange) - 1] < $pagination->getTotalPages()): ?>
+                        <?php if ($pageRange[count($pageRange) - 1] < $pagination->getTotalPages() - 1): ?>
+                            <span class="px-2 py-2 text-gray-700">...</span>
+                        <?php endif; ?>
+                        <a href="<?php echo url('request_checksheet?page=' . $pagination->getTotalPages() . '&search=' . urlencode($search ?? '') . '&status=' . urlencode($status ?? '') . '&start_date=' . urlencode($startDate ?? '') . '&end_date=' . urlencode($endDate ?? '')); ?>" 
+                           class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            <?php echo $pagination->getTotalPages(); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Next Button -->
+                <?php if ($pagination->hasNextPage()): ?>
+                    <a href="<?php echo url('request_checksheet?page=' . $pagination->getNextPage() . '&search=' . urlencode($search ?? '') . '&status=' . urlencode($status ?? '') . '&start_date=' . urlencode($startDate ?? '') . '&end_date=' . urlencode($endDate ?? '')); ?>" 
+                       class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        Next →
+                    </a>
+                <?php else: ?>
+                    <span class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                        Next →
+                    </span>
+                <?php endif; ?>
+            </nav>
+            <?php endif; ?>
         </div>
     </div>
 </div>

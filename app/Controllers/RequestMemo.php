@@ -6,6 +6,7 @@ use App\Session;
 use App\Database;
 use App\Security;
 use App\Controller;
+use App\Pagination;
 use App\Models\RequestMemo as RequestMemoModel;
 use App\Models\Conveyor as ConveyorModel;
 
@@ -18,6 +19,8 @@ class RequestMemo extends Controller
     {
         $search = $this->input('search');
         $status = $this->input('status');
+        $page = (int) ($this->input('page') ?? 1);
+        $perPage = 10;
         
         $requests = RequestMemoModel::getByUser(session('user_id'));
         
@@ -34,12 +37,23 @@ class RequestMemo extends Controller
             });
         }
 
+        // Prepare requests array for pagination
+        $requests = array_values($requests);
+        $totalRequests = count($requests);
+
+        // Create pagination object
+        $pagination = new Pagination($totalRequests, $perPage, $page);
+
+        // Paginate the results
+        $paginatedRequests = $pagination->paginate($requests);
+
         $this->setTitle('Internal Memo Requests');
         $this->view('request_memo/index', [
-            'requests' => array_values($requests),
+            'requests' => $paginatedRequests,
+            'pagination' => $pagination,
             'search' => $search,
             'status' => $status,
-            'totalCount' => count($requests),
+            'totalCount' => $totalRequests,
         ]);
     }
 
@@ -318,10 +332,12 @@ class RequestMemo extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
             'totalCount' => count($requests),
-            'pendingCount' => RequestMemoModel::countByStatus('pending'),
-            'approvedCount' => RequestMemoModel::countByStatus('approved'),
-            'rejectedCount' => RequestMemoModel::countByStatus('rejected'),
-            'completedCount' => RequestMemoModel::countByStatus('completed'),
+            'stats' => [
+                'pending' => RequestMemoModel::countByStatus('pending'),
+                'approved' => RequestMemoModel::countByStatus('approved'),
+                'rejected' => RequestMemoModel::countByStatus('rejected'),
+                'completed' => RequestMemoModel::countByStatus('completed'),
+            ],
         ]);
     }
 

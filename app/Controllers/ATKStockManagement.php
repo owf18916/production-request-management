@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controller;
 use App\Session;
+use App\Pagination;
 use App\Models\ATKStock as ATKStockModel;
 use App\Models\MasterATK as MasterATKModel;
 
@@ -25,6 +26,8 @@ class ATKStockManagement extends Controller
         }
 
         $search = $this->input('search', '');
+        $page = (int) ($this->input('page') ?? 1);
+        $perPage = 10;
         $stocks = ATKStockModel::getAllWithATKInfo();
 
         // Apply search filter
@@ -35,11 +38,22 @@ class ATKStockManagement extends Controller
             });
         }
 
+        // Prepare stocks array for pagination
+        $stocks = array_values($stocks);
+        $totalStocks = count($stocks);
+
+        // Create pagination object
+        $pagination = new Pagination($totalStocks, $perPage, $page);
+
+        // Paginate the results
+        $paginatedStocks = $pagination->paginate($stocks);
+
         $this->setTitle('Manajemen Stock ATK');
         $this->view('admin/atk_stock/index', [
-            'stocks' => array_values($stocks),
+            'stocks' => $paginatedStocks,
+            'pagination' => $pagination,
             'search' => $search,
-            'totalCount' => count($stocks),
+            'totalCount' => $totalStocks,
         ]);
     }
 
