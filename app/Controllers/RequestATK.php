@@ -26,12 +26,47 @@ class RequestATK extends Controller
             $this->redirect(url('login'));
         }
 
-        $search = $this->input('search');
-        $statusFilter = $this->input('status');
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
         $page = (int) ($this->input('page') ?? 1);
         $perPage = 10;
+
+        // Check if this is a clear filters request
+        $clearFilters = $this->input('clear_filters');
+        if ($clearFilters === '1') {
+            Session::forget('request_atk_filters');
+            $search = '';
+            $statusFilter = '';
+            $startDate = '';
+            $endDate = '';
+        } else {
+            // Check if user submitted filter form
+            $hasFilterInput = !empty($this->input('search')) || 
+                            !empty($this->input('status')) || 
+                            !empty($this->input('start_date')) || 
+                            !empty($this->input('end_date'));
+
+            if ($hasFilterInput) {
+                // User is submitting new filters - get from input and save to session
+                $search = $this->input('search', '');
+                $statusFilter = $this->input('status', '');
+                $startDate = $this->input('start_date', '');
+                $endDate = $this->input('end_date', '');
+
+                // Save filters to session
+                Session::put('request_atk_filters', [
+                    'search' => $search,
+                    'status' => $statusFilter,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                ]);
+            } else {
+                // User is just navigating - get filters from session
+                $filters = Session::get('request_atk_filters', []);
+                $search = $filters['search'] ?? '';
+                $statusFilter = $filters['status'] ?? '';
+                $startDate = $filters['start_date'] ?? '';
+                $endDate = $filters['end_date'] ?? '';
+            }
+        }
 
         if ($userRole === 'admin') {
             // Admin sees all requests
@@ -397,10 +432,44 @@ class RequestATK extends Controller
             $this->redirect(url('login'));
         }
 
-        $search = $this->input('search');
-        $statusFilter = $this->input('status');
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
+        // Check if this is a clear filters request
+        $clearFilters = $this->input('clear_filters');
+        if ($clearFilters === '1') {
+            Session::forget('admin_request_atk_filters');
+            $search = '';
+            $statusFilter = '';
+            $startDate = '';
+            $endDate = '';
+        } else {
+            // Check if user submitted filter form
+            $hasFilterInput = !empty($this->input('search')) || 
+                            !empty($this->input('status')) || 
+                            !empty($this->input('start_date')) || 
+                            !empty($this->input('end_date'));
+
+            if ($hasFilterInput) {
+                // User is submitting new filters - get from input and save to session
+                $search = $this->input('search', '');
+                $statusFilter = $this->input('status', '');
+                $startDate = $this->input('start_date', '');
+                $endDate = $this->input('end_date', '');
+
+                // Save filters to session
+                Session::put('admin_request_atk_filters', [
+                    'search' => $search,
+                    'status' => $statusFilter,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                ]);
+            } else {
+                // User is just accessing page - get filters from session
+                $filters = Session::get('admin_request_atk_filters', []);
+                $search = $filters['search'] ?? '';
+                $statusFilter = $filters['status'] ?? '';
+                $startDate = $filters['start_date'] ?? '';
+                $endDate = $filters['end_date'] ?? '';
+            }
+        }
 
         if ($search) {
             $requests = RequestATKModel::search($search);
@@ -632,28 +701,62 @@ class RequestATK extends Controller
             $this->redirect(url('login'));
         }
 
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
+        // Get filter values from session
+        $filters = $userRole === 'admin' 
+            ? Session::get('admin_request_atk_filters', [])
+            : Session::get('request_atk_filters', []);
+        
+        $search = $filters['search'] ?? '';
+        $statusFilter = $filters['status'] ?? '';
+        $startDate = $filters['start_date'] ?? '';
+        $endDate = $filters['end_date'] ?? '';
 
         // Validate date range
         if (!$startDate || !$endDate) {
             Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
-            $this->redirect(url('admin/requests/atk'));
+            if ($userRole === 'admin') {
+                $this->redirect(url('admin/requests/atk'));
+            } else {
+                $this->redirect(url('requests/atk'));
+            }
             return;
         }
 
         $validation = validateDateRange($startDate, $endDate);
         if ($validation !== true) {
             Session::flash('error', $validation);
-            $this->redirect(url('admin/requests/atk'));
+            if ($userRole === 'admin') {
+                $this->redirect(url('admin/requests/atk'));
+            } else {
+                $this->redirect(url('requests/atk'));
+            }
             return;
         }
 
         // Get requests based on role
         if ($userRole === 'admin') {
-            $requests = RequestATKModel::getAll();
+            if ($search) {
+                $requests = RequestATKModel::search($search);
+            } else {
+                $requests = RequestATKModel::getAll();
+            }
         } else {
             $requests = RequestATKModel::getByUser($userId);
+            
+            // Apply search on their requests
+            if ($search) {
+                $requests = array_filter($requests, function($request) use ($search) {
+                    return stripos($request->request_number, $search) !== false || 
+                           stripos($request->nama_barang ?? '', $search) !== false;
+                });
+            }
+        }
+
+        // Apply status filter
+        if ($statusFilter && $statusFilter !== 'all') {
+            $requests = array_filter($requests, function($request) use ($statusFilter) {
+                return $request->status === $statusFilter;
+            });
         }
 
         // Apply date range filter

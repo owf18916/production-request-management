@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controller;
+use App\Database;
 use App\Session;
 use App\Security;
 use App\Pagination;
@@ -51,13 +52,52 @@ class RequestID extends Controller
     public function index(): void
     {
         $userId = session('user_id');
-        $search = $this->input('search', '');
-        $idTypeFilter = $this->input('id_type', '');
-        $statusFilter = $this->input('status', '');
-        $startDate = $this->input('start_date', '');
-        $endDate = $this->input('end_date', '');
         $page = (int) ($this->input('page') ?? 1);
         $perPage = 10;
+
+        // Check if this is a clear filters request
+        $clearFilters = $this->input('clear_filters');
+        if ($clearFilters === '1') {
+            Session::forget('request_id_filters');
+            $search = '';
+            $idTypeFilter = '';
+            $statusFilter = '';
+            $startDate = '';
+            $endDate = '';
+        } else {
+            // Check if user submitted filter form (has search, id_type, status, or date inputs)
+            $hasFilterInput = !empty($this->input('search')) || 
+                            !empty($this->input('id_type')) || 
+                            !empty($this->input('status')) || 
+                            !empty($this->input('start_date')) || 
+                            !empty($this->input('end_date'));
+
+            if ($hasFilterInput) {
+                // User is submitting new filters - get from input and save to session
+                $search = $this->input('search', '');
+                $idTypeFilter = $this->input('id_type', '');
+                $statusFilter = $this->input('status', '');
+                $startDate = $this->input('start_date', '');
+                $endDate = $this->input('end_date', '');
+
+                // Save filters to session
+                Session::put('request_id_filters', [
+                    'search' => $search,
+                    'id_type' => $idTypeFilter,
+                    'status' => $statusFilter,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                ]);
+            } else {
+                // User is just navigating (page change) - get filters from session
+                $filters = Session::get('request_id_filters', []);
+                $search = $filters['search'] ?? '';
+                $idTypeFilter = $filters['id_type'] ?? '';
+                $statusFilter = $filters['status'] ?? '';
+                $startDate = $filters['start_date'] ?? '';
+                $endDate = $filters['end_date'] ?? '';
+            }
+        }
 
         $requests = RequestIDModel::getByUser($userId);
 
@@ -243,6 +283,28 @@ class RequestID extends Controller
                 $allSuccess = false;
                 $insertErrors[] = "Item " . ($index + 1) . " gagal disimpan";
                 error_log("RequestID store - Failed to insert item " . ($index + 1) . " for request " . $requestNumber);
+            } else {
+                // Get the newly created request ID
+                $requestId = (int) Database::lastId();
+                
+                // Prepare details array - exclude meta fields and empty values
+                $details = [];
+                $excludeFields = ['id_type', 'notes', '_csrf_token'];
+                
+                foreach ($item as $key => $value) {
+                    // Skip: excluded fields, null values, and empty strings
+                    if (!in_array($key, $excludeFields) && $value !== null && $value !== '') {
+                        $details[$key] = $value;
+                    }
+                }
+                
+                // Save details to request_id_details table
+                if (!empty($details)) {
+                    $detailSuccess = RequestIDModel::saveDetails($requestId, $details);
+                    if (!$detailSuccess) {
+                        error_log("RequestID store - Failed to save details for request_id " . $requestId);
+                    }
+                }
             }
         }
 
@@ -362,11 +424,49 @@ class RequestID extends Controller
      */
     public function adminIndex(): void
     {
-        $search = $this->input('search', '');
-        $idTypeFilter = $this->input('id_type', '');
-        $statusFilter = $this->input('status', '');
-        $startDate = $this->input('start_date', '');
-        $endDate = $this->input('end_date', '');
+        // Check if this is a clear filters request
+        $clearFilters = $this->input('clear_filters');
+        if ($clearFilters === '1') {
+            Session::forget('admin_request_id_filters');
+            $search = '';
+            $idTypeFilter = '';
+            $statusFilter = '';
+            $startDate = '';
+            $endDate = '';
+        } else {
+            // Check if user submitted filter form (has search, id_type, status, or date inputs)
+            $hasFilterInput = !empty($this->input('search')) || 
+                            !empty($this->input('id_type')) || 
+                            !empty($this->input('status')) || 
+                            !empty($this->input('start_date')) || 
+                            !empty($this->input('end_date'));
+
+            if ($hasFilterInput) {
+                // User is submitting new filters - get from input and save to session
+                $search = $this->input('search', '');
+                $idTypeFilter = $this->input('id_type', '');
+                $statusFilter = $this->input('status', '');
+                $startDate = $this->input('start_date', '');
+                $endDate = $this->input('end_date', '');
+
+                // Save filters to session
+                Session::put('admin_request_id_filters', [
+                    'search' => $search,
+                    'id_type' => $idTypeFilter,
+                    'status' => $statusFilter,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                ]);
+            } else {
+                // User is just accessing page - get filters from session
+                $filters = Session::get('admin_request_id_filters', []);
+                $search = $filters['search'] ?? '';
+                $idTypeFilter = $filters['id_type'] ?? '';
+                $statusFilter = $filters['status'] ?? '';
+                $startDate = $filters['start_date'] ?? '';
+                $endDate = $filters['end_date'] ?? '';
+            }
+        }
 
         $requests = RequestIDModel::getAll();
 
@@ -503,20 +603,36 @@ class RequestID extends Controller
             $this->redirect(url('login'));
         }
 
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
+        // Get filter values from session
+        $filters = $userRole === 'admin' 
+            ? Session::get('admin_request_id_filters', [])
+            : Session::get('request_id_filters', []);
+        
+        $search = $filters['search'] ?? '';
+        $idTypeFilter = $filters['id_type'] ?? '';
+        $statusFilter = $filters['status'] ?? '';
+        $startDate = $filters['start_date'] ?? '';
+        $endDate = $filters['end_date'] ?? '';
 
         // Validate date range
         if (!$startDate || !$endDate) {
             Session::flash('error', 'Tanggal mulai dan akhir harus diisi');
-            $this->redirect(url('admin/request-id'));
+            if ($userRole === 'admin') {
+                $this->redirect(url('admin/request-id'));
+            } else {
+                $this->redirect(url('request-id'));
+            }
             return;
         }
 
         $validation = validateDateRange($startDate, $endDate);
         if ($validation !== true) {
             Session::flash('error', $validation);
-            $this->redirect(url('admin/request-id'));
+            if ($userRole === 'admin') {
+                $this->redirect(url('admin/request-id'));
+            } else {
+                $this->redirect(url('request-id'));
+            }
             return;
         }
 
@@ -525,6 +641,20 @@ class RequestID extends Controller
             $requests = RequestIDModel::getAll();
         } else {
             $requests = RequestIDModel::getByUser($userId);
+        }
+
+        // Apply filters
+        if ($idTypeFilter) {
+            $requests = array_filter($requests, fn($r) => $r->id_type === $idTypeFilter);
+        }
+        if ($statusFilter) {
+            $requests = array_filter($requests, fn($r) => $r->status === $statusFilter);
+        }
+        if ($search) {
+            $requests = array_filter($requests, fn($r) => 
+                stripos($r->request_number, $search) !== false || 
+                stripos($r->id_type, $search) !== false
+            );
         }
 
         // Apply date range filter

@@ -111,7 +111,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Search</button>
-                    <a href="<?php echo url('admin/request_checksheet'); ?>" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Clear</a>
+                    <a href="<?php echo url('admin/request_checksheet?clear_filters=1'); ?>" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Clear</a>
                 </div>
             </form>
             

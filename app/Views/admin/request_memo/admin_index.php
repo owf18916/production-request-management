@@ -113,7 +113,7 @@
                     <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
                         Filter
                     </button>
-                    <a href="<?php echo url('/admin/requests/memo'); ?>" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-medium text-center">
+                    <a href="<?php echo url('/admin/requests/memo?clear_filters=1'); ?>" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-medium text-center">
                         Clear Filters
                     </a>
                 </div>

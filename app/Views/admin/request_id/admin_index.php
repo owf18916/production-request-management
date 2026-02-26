@@ -123,6 +123,9 @@
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         Filter
                     </button>
+                    <a href="<?php echo url('/admin/request-id?clear_filters=1'); ?>" class="bg-gray-400 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-500">
+                        Reset
+                    </a>
                 </div>
             </form>
 
